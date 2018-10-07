@@ -11,20 +11,24 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from YamJam import yamjam
+
+
+#Setting base directory
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+#Safely getting secure keys and other information
+config = yamjam(os.path.join(BASE_DIR,'config.yaml'))['biopy']
+
+SECRET_KEY = config['secret_key']
 
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 ROOT_URLCONF = 'BioPy.urls'
 
-# Private Keys make secret on deployment
-
-SECRET_KEY = '0a-vvj-h4t5o=(tp19lv6_b0%xah2(*76la1o#qkby78q@yq^u'
-
-GOOGLE_API_KEY = 'AIzaSyCmpXZ72-s2ZS2_igChq2ZsoZzQSJqj__8'
 
 # Redirects
 LOGIN_REDIRECT_URL = '/home'
@@ -121,14 +125,15 @@ WSGI_APPLICATION = 'BioPy.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+db = config['database']
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'biopy',
-        'USER': 'biopy',
-        'PASSWORD': 'biopy',
-        'HOST': 'localhost',
-        'PORT': '5432'
+        'ENGINE': db['engine'],
+        'NAME': db['name'],
+        'USER': db['user'],
+        'PASSWORD': db['password'],
+        'HOST': db['host'],
+        'PORT': db['port']
 
     }
 }

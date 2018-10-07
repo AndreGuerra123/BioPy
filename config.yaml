@@ -1,0 +1,9 @@
+biopy:
+    secret_key: biopy$or_4bvwm4qbg@die+xa9ju5+h$of4e@%*4yflxe&9pdagj&v2x$biopy
+    database:
+      engine: django.db.backends.postgresql_psycopg2
+      name: biopyapp
+      user: biopyapp
+      password: biopyapp
+      host: 127.0.0.1
+      port: 5432
