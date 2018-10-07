@@ -1,0 +1,2 @@
+{% load i18n %}
+{% blocktrans %}The primary e-mail address was successfully set.{% endblocktrans %}

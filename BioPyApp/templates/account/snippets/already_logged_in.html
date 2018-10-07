@@ -1,0 +1,4 @@
+{% load i18n %}
+{% load account %}
+{% user_display user as user_display %}
+<p class="medium-txt"><strong>{% trans "Warning" %}:</strong> {% blocktrans %}You are already logged in as {{ user_display }}.{% endblocktrans %}</p>

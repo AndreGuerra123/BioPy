@@ -1,0 +1,276 @@
+{% load static %}
+{% load i18n %}
+{% load rest_framework %}
+
+{% comment %} Everything will reside inside this block {% endcomment %}
+<div class="glb">
+
+{% comment %} JS {% endcomment %}
+<script>
+window.drf = {
+    csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
+    csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}"
+};
+</script>
+<script src="{% static "rest_framework/js/ajax-form.js" %}"></script>
+<script src="{% static "rest_framework/js/prettify-min.js" %}"></script>
+<script src="{% static "rest_framework/js/default.js" %}"></script>
+<script>
+$(document).ready(function() {
+    $('form').ajaxForm();
+});
+</script>
+
+{% comment %} TITLE {% endcomment %}
+<h1 class="large-txt">{{ name }}</h1>
+<hr class="mt-0 mb-4">
+
+{% comment %} DESCRIPTION {% endcomment %}
+{% if description %}
+<h2 class="large-txt">{% trans 'Description' %}</h2>
+        <hr class="mt-0 mb-4">
+<div class="glb-h">
+    <div class="glb-h-e">        
+        {{description}}
+    </div>
+</div>
+{% endif %}          
+
+<h2 class="large-txt">{% trans 'Location' %}</h2>
+<hr class="mt-0 mb-4">
+{% comment %} LOCATION {% endcomment %}
+<div class="glb-h">
+    <div class="glb-h-e">
+        <ul class="breadcrumb">
+        {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
+            {% if forloop.last %}
+            <li class="active"><a href="{{ breadcrumb_url }}">{{ breadcrumb_name }}</a></li>
+            {% else %}
+            <li><a href="{{ breadcrumb_url }}">{{ breadcrumb_name }}&nbsp;/&nbsp;</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if paginator %}
+            <li style="float: right">{% get_pagination_html paginator %}</li>
+        {% endif %}
+        </ul>
+    </div>
+</div>
+
+{% comment %} REQUEST INFO {% endcomment %}
+<h2 class="large-txt">{% trans 'Request' %}</h2>
+<hr class="mt-0 mb-4">
+<div class="glb-h">
+<div class="glb-h-e" style="word-break: break-all;">
+<div class="breadcrumb" aria-label="{% trans "Request Information" %}">
+    <b>{{ request.method }}</b>&nbsp;{{ request.get_full_path}}
+</div>
+</div>
+</div>
+
+{% comment %} RESPONSE {% endcomment %}
+<h2 class="large-txt">{% trans 'Response' %}</h2>
+<hr class="mt-0 mb-4">
+<div class="glb-h">
+<div class="glb-h-e">
+<div class="breadcrumb" aria-label="{% trans "Response Information" %}">
+    <div class="glb-v">
+    <div class = "glb-v-e"><b>HTTP Status: </b>{{ response.status_code }}</div>
+    <div class="glb-v-e"><b>Description: </b>{{ response.status_text }}</div>
+    {% for key, val in response_headers|items %}
+    <div class="glb-v-e"><b>{{ key }}:</b>&nbsp;{{ val |break_long_headers|urlize_quoted_links}}</div>
+    {% endfor %}
+    </div>
+</div>
+</div>
+</div>
+
+
+{% comment %} RESPONSE CONTENT {% endcomment %}
+<h2 class="large-txt">{% trans 'Content' %}</h2>
+<hr class="mt-0 mb-4">
+<div class="glb-h">
+<div class="glb-h-e" style="word-break: break-word">
+<div class="breadcrumb" aria-label="{% trans "Response Information" %}">
+        {% autoescape off %}
+        <pre><span>{{ content |urlize_quoted_links }}</pre>
+        {% endautoescape %}
+</div>
+</div>
+</div>
+
+
+{% comment %} Filter {% endcomment %}
+
+{% if filter_form %}
+<h2 class="large-txt">{% trans 'Filter' %}</h2>
+<hr class="mt-0 mb-4">
+<div class="glb-h">
+<div class="glb-h-e">
+<div class="breadcrumb" aria-label="{% trans "Response Information" %}">
+    {{ filter_form }}
+</div>
+</div>
+</div>
+{% endif %}
+
+
+<h2 class="large-txt">{% trans 'Action' %}</h2>
+<hr class="mt-0 mb-4">
+{% comment %} ACTIONS {% endcomment %}
+<div class="glb-h">
+    {% comment %} OPTIONS BUTTON {% endcomment %}
+    {% if options_form %}
+    <div class="glb-h-left">
+    <form action="{{ request.get_full_path }}" data-method="OPTIONS">
+        <button class="btn btn-default js-tooltip" title="Make an OPTIONS request on the {{ name }} resource">{% trans 'OPTIONS' %}</button>
+    </form>
+    </div>
+    {% endif %}
+
+    {% comment %} EXTRA ACTIONS {% endcomment %}
+    {% if extra_actions %}
+    <div class="glb-h-left">
+        <button class="btn btn-default" id="extra-actions-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        {% trans "MORE" %}
+        <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="extra-actions-menu">
+        {% for action_name, url in extra_actions|items %}
+        <li><a href="{{ url }}">{{ action_name }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% comment %} FILTER {% endcomment %}
+    {% if filter_form %}
+    <div class="glb-h-right">
+    <button data-toggle="modal" data-target="#filtersModal" class="btn btn-default">
+        <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+        {% trans 'FILTER' %}
+    </button>
+    </div>
+    {% endif %}
+
+    {% comment %} DELETE BUTTON {% endcomment %}
+    {% if delete_form %}
+    <div class="glb-h-right">
+        <button class="btn btn-danger js-tooltip" title="Make a DELETE request on the {{ name }} resource" data-toggle="modal" data-target="#deleteModal">{% trans 'DELETE' %}</button>
+    </div>
+    {% endif %}
+   
+    {% comment %} GET BUTTON {% endcomment %}
+    {% if 'GET' in allowed_methods %}
+    <div class="glb-h-right">
+    <form id="get-form">
+        <fieldset>
+        {% if api_settings.URL_FORMAT_OVERRIDE %}
+            <div class="btn-group format-selection">
+            <a class="btn btn-success js-tooltip" href="{{ request.get_full_path }}" rel="nofollow" title="Make a GET request on the {{ name }} resource">{% trans 'GET' %}</a>
+            <button class="btn btn-success dropdown-toggle js-tooltip" data-toggle="dropdown" title="Specify a format for the GET request">
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                {% for format in available_formats %}
+                <li>
+                    <a class="js-tooltip format-option" href="{% add_query_param request api_settings.URL_FORMAT_OVERRIDE format %}" rel="nofollow" title="Make a GET request on the {{ name }} resource with the format set to `{{ format }}`">{{ format }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            </div>
+        {% else %}
+            <a class="btn btn-success js-tooltip" href="{{ request.get_full_path }}" rel="nofollow" title="Make a GET request on the {{ name }} resource">{% trans 'GET' %}</a>
+        {% endif %}
+        </fieldset>
+    </form>
+    </div>
+    {% endif %}
+
+</div>
+
+{% comment %} FORM {% endcomment %}
+
+{% if display_edit_forms %}
+
+<h2 class="large-txt">{% trans 'Forms' %}</h2>
+<hr class="mt-0 mb-4">
+<div class="glb-h">
+<div class="glb-h-e">
+
+    <ul class="nav nav-tabs medium-txt" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link" href="#html-form" data-toggle="tab" role="tab">{% trans 'HTML Form'%}</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#raw-form" data-toggle="tab" role="tab">{% trans 'Raw Form'%}</a>
+        </li>
+    </ul>
+
+    {% comment %} POST {% endcomment %}
+
+    <div class="glb-h tab-content medium-txt">
+    {% if post_form %}
+        <div class="glb-h-e tab-pane" role="tabpanel" id="html-form">
+        {% with form=post_form %}
+            <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class="form-horizontal" novalidate>
+            <fieldset>
+                {% csrf_token %}
+                {{ post_form }}
+                <div class="form-actions">
+                <button class="btn btn-success" title="Make a POST request on the {{ name }} resource">{% trans 'POST' %}</button>
+                </div>
+            </fieldset>
+            </form>
+        {% endwith %}
+        </div>
+        <div class="glb-h-e tab-pane" role="tabpanel" id="raw-form">
+            {% with form=raw_data_post_form %}
+            <form action="{{ request.get_full_path }}" method="POST" class="form-horizontal">
+                <fieldset>
+                {% include "rest_framework/raw_data_form.html" %}
+                <div class="form-actions">
+                    <button class="btn btn-success" title="Make a POST request on the {{ name }} resource">POST</button>
+                </div>
+                </fieldset>
+            </form>
+            {% endwith %}
+        </div>
+    {% endif %}
+
+    {% comment %} PUT / PATCH {% endcomment %}
+    {% if put_form or raw_data_put_form or raw_data_patch_form %}
+        <div class="glb-h-e tab-pane" role="tabpanel" id="html-form">
+            <form action="{{ request.get_full_path }}" data-method="PUT" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                <fieldset>
+                {{ put_form }}
+                <div class="form-actions">
+                    <button class="btn btn-success js-tooltip" title="Make a PUT request on the {{ name }} resource">{% trans 'PUT'%}</button>
+                </div>
+                </fieldset>
+            </form>
+        </div>
+        <div class="glb-h-e tab-pane" role="tabpanel" id="raw-form">
+                {% with form=raw_data_put_or_patch_form %}
+                <form action="{{ request.get_full_path }}" class="form-horizontal">
+                    <fieldset>
+                    {% include "rest_framework/raw_data_form.html" %}
+                        {% if raw_data_put_form %}
+                        <button  data-method="PUT" class="btn btn-success js-tooltip" title="Make a PUT request on the {{ name }} resource">{% trans 'PUT' %}</button>
+                        {% endif %}
+                        {% if raw_data_patch_form %}
+                        <button data-method="PATCH" class="btn btn-success js-tooltip" title="Make a PATCH request on the {{ name }} resource">{% trans 'PATCH' %}</button>
+                        {% endif %}
+                    </fieldset>
+                </form>
+                {% endwith %}
+        </div>
+    {% endif %}
+    </div>
+
+</div>
+</div>
+
+{% endif %}
+
+</div>
+

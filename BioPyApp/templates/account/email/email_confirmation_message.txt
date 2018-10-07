@@ -1,0 +1,15 @@
+{% load account %}
+{% user_display user as user_display %}
+{% load i18n %}
+{% blocktrans %}Hello, {{ user_display }}.{% endblocktrans %}
+
+{% autoescape off %}{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}
+Welcome to {{ site_name }}!
+You're receiving this e-mail because you registered at {{site_domain}} with the following username: {{ username }}.
+It can be safely ignored if you did not registered, however, we recommend you to contact us.
+Click the link below to confirm your email and activate your account.
+{{ activate_url }}
+{% endblocktrans %}
+{% endautoescape %}
+
+{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}Thank you on behalf of {{ site_name }},{{ site_domain }}.{% endblocktrans %}

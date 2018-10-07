@@ -1,0 +1,5 @@
+{% load i18n %}
+{% blocktrans %}The primary e-mail address, {{email}}, cannot be removed.
+{% endblocktrans %}
+
+

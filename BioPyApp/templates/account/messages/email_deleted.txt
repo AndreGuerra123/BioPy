@@ -1,0 +1,2 @@
+{% load i18n %}
+{% blocktrans %}The e-mail address {{email}}: was removed successfully.{% endblocktrans %}
