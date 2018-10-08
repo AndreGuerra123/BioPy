@@ -1,7 +1,0 @@
-Django==2.1.2
-django_newsletter==0.7
-YamJam==0.1.7
-django_crispy_forms==1.7.2
-newsletter==0.1.22pre
-djangorestframework==3.8.2
-django-allauth==0.37.1
