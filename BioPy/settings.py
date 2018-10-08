@@ -23,12 +23,9 @@ config = yamjam(os.path.join(BASE_DIR,'config.yaml'))['biopy']
 SECRET_KEY = config['secret_key']
 
 DEBUG = True
-
 ALLOWED_HOSTS = []
 
-
 ROOT_URLCONF = 'BioPy.urls'
-
 
 # Redirects
 LOGIN_REDIRECT_URL = '/home'
