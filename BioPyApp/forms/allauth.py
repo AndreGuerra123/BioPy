@@ -7,10 +7,9 @@ import django.contrib.auth.password_validation as passwordValidation
 
 from BioPyApp.models import User
 
-from phonenumber_field.formfields import PhoneNumberField
+""" from phonenumber_field.formfields import PhoneNumberField"""
 from datetime import date, timedelta
-from address.forms import AddressField
-
+""" from address.forms import AddressField"""
 from crispy_forms.bootstrap import Field
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Fieldset, Column, Row, Div, HTML
