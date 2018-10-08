@@ -1,7 +1,0 @@
-django_phonenumber_field==2.0.1
-django_newsletter==0.7
-Django==2.1.2
-django_address==0.2.0
-address==0.1.1
-django_crispy_forms==1.7.2
-newsletter==0.1.22pre
