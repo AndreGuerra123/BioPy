@@ -11,19 +11,14 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-from YamJam import yamjam
-
+import django_heroku
 
 #Setting base directory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-#Safely getting secure keys and other information
-config = yamjam(os.path.join(BASE_DIR,'config.yaml'))['biopy']
-
-SECRET_KEY = config['secret_key']
+SECRET_KEY = os.environ('SECRET_KEY')
 
 DEBUG = True
-ALLOWED_HOSTS = []
 
 ROOT_URLCONF = 'BioPy.urls'
 
@@ -31,7 +26,6 @@ ROOT_URLCONF = 'BioPy.urls'
 LOGIN_REDIRECT_URL = '/home'
 LOGOUT_REDIRECT_URL = '/goodbye'
 
-# Allauth configuration
 
 # Ensure SITE_ID is set sites app 
 SITE_ID = 1
@@ -54,8 +48,6 @@ ACCOUNT_LOGOUT_REDIRECT_URL = "/goodbye"
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_USERNAME_VALIDATORS = 'BioPyApp.validators.allauth.UsernameValidators'
-
-
 
 #crispy
 
@@ -91,6 +83,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware'
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -122,15 +115,14 @@ WSGI_APPLICATION = 'BioPy.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-db = config['database']
 DATABASES = {
     'default': {
-        'ENGINE': db['engine'],
-        'NAME': db['name'],
-        'USER': db['user'],
-        'PASSWORD': db['password'],
-        'HOST': db['host'],
-        'PORT': db['port']
+        'ENGINE': os.environ('DB_ENGINE'),
+        'NAME': os.environ('DB_NAME'),
+        'USER': os.environ('DB_USER'),
+        'PASSWORD': os.environ('DB_PASS'),
+        'HOST': os.environ('DB_HOST'),
+        'PORT': os.environ('DB_PORT')
 
     }
 }
@@ -172,4 +164,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS=[os.path.join(BASE_DIR,'BioPy','static')]
+STATICFILES_DIRS=[os.path.join(BASE_DIR,'static')]
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
+
+
+# Configure Django App for Heroku.
+django_heroku.settings(locals())

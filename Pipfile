@@ -9,9 +9,10 @@ djangorestframework = "*"
 django-crispy-forms = "*"
 django-newsletter = "*"
 django-allauth = "*"
-yamjam = "*"
 "psycopg2" = "*"
 gunicorn = "*"
+django-heroku = "*"
+whitenoise = "*"
 
 [dev-packages]
 
