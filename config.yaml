@@ -4,6 +4,6 @@ biopy:
       engine: django.db.backends.postgresql
       name: biopy
       user: biopyuser
-      password: biopyuser123
+      password: biopypass
       host: 127.0.0.1
       port: 5432

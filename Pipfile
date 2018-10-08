@@ -11,6 +11,7 @@ django-newsletter = "*"
 django-allauth = "*"
 yamjam = "*"
 "psycopg2" = "*"
+gunicorn = "*"
 
 [dev-packages]
 
