@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-import django_heroku
 
 #Setting base directory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,6 +18,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = True
+
+ALLOWED_HOSTS = []
 
 ROOT_URLCONF = 'BioPy.urls'
 
@@ -33,6 +34,7 @@ SITE_ID = 1
 # Add the 'allauth' backend to AUTHENTICATION_BACKEND and keep default ModelBackend
 AUTHENTICATION_BACKENDS = [ 'django.contrib.auth.backends.ModelBackend',
                            'allauth.account.auth_backends.AuthenticationBackend'] 
+
 # EMAIL_BACKEND so allauth can proceed to send confirmation emails
 # ONLY for development/testing use console 
 EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend'
@@ -53,7 +55,18 @@ ACCOUNT_USERNAME_VALIDATORS = 'BioPyApp.validators.allauth.UsernameValidators'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
-# others
+# DB
+
+DATABASES = {
+    'default': {
+        'ENGINE': os.environ['DB_ENGINE'],
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['DB_PASS'],
+        'HOST': os.environ['DB_HOST'],
+        'PORT': os.environ['DB_PORT'],
+    }
+}
 
 INSTALLED_APPS = [
     'BioPyApp',
@@ -83,6 +96,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -148,7 +162,3 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS=[os.path.join(BASE_DIR,'static')]
 STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
-
-
-# Configure Django App for Heroku.
-django_heroku.settings(locals())

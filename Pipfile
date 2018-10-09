@@ -11,10 +11,10 @@ django-newsletter = "*"
 django-allauth = "*"
 "psycopg2" = "*"
 gunicorn = "*"
-django-heroku = "*"
 whitenoise = "*"
 
 [dev-packages]
+pylint = "<2.0.0"
 
 [requires]
 python_version = "3.6"
