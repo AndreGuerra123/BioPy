@@ -19,7 +19,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = True
 
-ALLOWED_HOSTS = [os.environ['HOST']]
+ALLOWED_HOSTS = ['127.0.0.1',os.environ['HOST']]
 
 ROOT_URLCONF = 'BioPy.urls'
 
