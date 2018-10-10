@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="glb">
+<div class="glb-v">
+<div class="glb-v-e">
+<h1 class="large-txt">{% blocktrans with titlehere=object.title|add:" newsletter"|title %}{{titlehere}}{% endblocktrans %}</h1>
+<hr class="mt-0 mb-4">
+</div>
+
+<div class="glb-v-e">
+<a class="btn btn-success" href="{% url "newsletter_subscribe_request" object.slug %}">{% trans "Subscribe" %}</a>
+</div>
+
+{% if not user.is_authenticated %}
+<div class="glb-h-e">
+<a class="btn btn-warning" href="{% url "newsletter_update_request" object.slug %}">{% trans "Update" %}</a>
+</div>
+{% endif %}
+
+<div class="glb-h-e">
+<a class="btn btn-danger" href="{% url "newsletter_unsubscribe_request" object.slug %}">{% trans "Unsubscribe" %}</a>
+</div>
+
+<div class="glb-h-e">
+<a class="btn btn-primary" href="{% url "newsletter_archive" object.slug %}">{% trans "Archive" %}</a>
+</div>
+
+
+</div>
+</div>
+{% endblock content %}

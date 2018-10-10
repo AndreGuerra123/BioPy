@@ -35,6 +35,12 @@
       </div>
       <div class="glb-h-e">
         <h2 class="large-txt">Newsletter</h2>
+        <form enctype="multipart/form-data" method="post" action="/newsletter/general/subscribe/">
+        {% csrf_token %}
+        <input type="email" name="email_field" required="" id="id_email_field" placeholder="E-mail address">
+        <button class="btn btn-success" id="id_submit" name="submit" value="Subscribe" type="submit">Subscribe</button>
+        {{ form|crispy }}        
+        </form>
       </div>
     </div>
     <div style="text-align:center">

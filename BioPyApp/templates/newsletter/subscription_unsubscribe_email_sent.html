@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="glb">
+<div class="glb-h">
+<div class="glb-h-e">
+<h1 class="large-txt">{% trans "Newsletter unsubscribe" %} {{ newsletter.title }}</h1>
+<hr class="mt-0 mb-4">
+<p class="medium-txt">{% trans "Your unsubscription request has successfully been received. An email has been sent to you with a link you need to follow in order to confirm your unsubscription." %}</p>
+</div>
+</div>
+</div>
+{% endblock content %}
+

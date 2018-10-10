@@ -7,11 +7,11 @@ name = "pypi"
 django = "*"
 djangorestframework = "*"
 django-crispy-forms = "*"
-django-newsletter = "*"
 django-allauth = "*"
 "psycopg2" = "*"
 gunicorn = "*"
 whitenoise = "*"
+django-newsletter = {editable = true, git = "https://github.com/dokterbob/django-newsletter.git"}
 
 [dev-packages]
 pylint = "<2.0.0"

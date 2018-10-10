@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="glb">
+<div class="glb-h">
+<div class="glb-h-e">
+<h1 class="large-txt">{% trans "Newsletter" %} {{ newsletter.title }} {{ action }} {% trans "activate" %}</h1>
+<hr class="mt-0 mb-4">
+<p class="medium-txt">{% trans "You have successfully been unsubscribed." %}</p>
+</div>
+</div>
+</div>
+{% endblock content %}

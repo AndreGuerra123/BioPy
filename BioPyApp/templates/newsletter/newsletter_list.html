@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="glb">
+
+  <div class="glb-v">
+    <div class="glb-v-e">
+      <h1 class="large-txt">{% trans "Newsletters" %}</h1>
+      <hr class="mt-0 mb-4">
+    </div>
+  </div>
+
+  {% if user.is_authenticated %}
+  <form method="POST" action="">
+  {% csrf_token %}
+  {{ formset.management_form |crispy }}
+  <table class="table table-borderless medium-txt">
+    <tr >
+        <th scope="col">{% trans "Newsletter" %}</th>
+        {% if user %}
+        <th scope="col">{% trans "Subscribed" %}</th>
+        {% endif %}
+    </tr>
+    {% for form in formset.forms %}
+    <tr scope="row">
+      <td>{{ form.id|capfirst }}{{ form.newsletter|capfirst }}
+        <a href="{% url "newsletter_detail" form.instance.newsletter.slug %}">{{ form.instance.newsletter.title|capfirst}}</a></td>
+      <td>{{ form.subscribed }}</td>
+    </tr>
+    {% endfor %}
+    <tr scope="row"> 
+      <td><input class="btn btn-primary" id="id_submit" name="submit" value="{% trans "Update" %}" type="submit" /></td>
+    </tr>
+  </table>
+</form>
+ 
+  {% else %}
+    <div class="glb-v">
+      {% for newsletter in object_list %}
+        <div class="glb-v-e">
+            <a class="btn btn-primary" href="{% url "newsletter_detail" newsletter.slug %}">{% blocktrans with newsletterhere=newsletter.title|title %}{{newsletterhere}}{% endblocktrans %}</a>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+</div>
+{% endblock content %}

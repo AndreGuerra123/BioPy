@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="glb">
+<div class="glb-h">
+<div class="glb-h-e">
+<h1 class="large-txt">{% trans "Newsletter subscribe" %} {{ newsletter.title }}</h1>
+<hr class="mt-0 mb-4">
+<p class="medium-txt">Welcome, {{ user }}!</p>
+{% if messages %}
+<ul class="medium-txt">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="medium-txt">{% trans "Do you want to subscribe to this newsletter?" %}</p>
+<form enctype="multipart/form-data" method="post" action="{% url "newsletter_subscribe_confirm" newsletter.slug %}">
+    {% csrf_token %}
+    <p><input id="id_submit" name="submit" value="{% trans "Subscribe" %}" type="submit" /></p>
+</form>
+{% endif %}
+</div>
+</div>
+</div>
+{% endblock content %}
+

@@ -37,7 +37,7 @@ urlpatterns = [
 
     # Newletter
 
-    #path('newsletter/',include('newsletter.urls')), # Wait until they fix the permalink issue in github
+    path('newsletter/',include('newsletter.urls')),
 
     # General
 

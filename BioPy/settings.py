@@ -70,27 +70,23 @@ DATABASES = {
 
 INSTALLED_APPS = [
     'BioPyApp',
-
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
     'django.contrib.auth',    
     'django.contrib.sites',
     'django.contrib.admin',
-
     'crispy_forms', 
     'rest_framework',
-
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.openid',
-    #'sorl.thumbnail', add this when they fix the bug in github
-    #'newsletter',
+    'sorl.thumbnail',
+    'newsletter'
 
 ]
 
