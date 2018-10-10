@@ -4,7 +4,7 @@
 <div class="glb">
 <div class="glb-h">
 <div class="glb-h-e">
-<h1 class="large-txt">{% trans "Newsletter subscribe" %} {{ newsletter.title }}</h1>
+<h1 class="large-txt">{% blocktrans with titlehere=newsletter.title|add:" newsletter"|title actionhere=action|add:" confirmation"|title %}{{titlehere}}&nbsp;{{actionhere}}{% endblocktrans %}</h1>
 <hr class="mt-0 mb-4">
 <p class="medium-txt">Welcome, {{ user }}!</p>
 {% if messages %}
@@ -14,10 +14,10 @@
     {% endfor %}
 </ul>
 {% else %}
-<p class="medium-txt">{% trans "Do you want to subscribe to this newsletter?" %}</p>
 <form enctype="multipart/form-data" method="post" action="{% url "newsletter_subscribe_confirm" newsletter.slug %}">
     {% csrf_token %}
-    <p><input id="id_submit" name="submit" value="{% trans "Subscribe" %}" type="submit" /></p>
+    <p class="medium-txt">{% trans "Do you want to subscribe to this newsletter?" %}</p>
+    <input class="btn btn-success" id="id_submit" name="submit" value="{% trans "Subscribe" %}" type="submit" />
 </form>
 {% endif %}
 </div>

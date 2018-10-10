@@ -5,22 +5,22 @@
 <div class="glb">
 <div class="glb-h">
 <div class="glb-h-e">
-<h1 class="large-txt">{% trans "Newsletter unsubscribe" %} {{ newsletter.title }}</h1>
+<h1 class="large-txt">{% blocktrans with titlehere=newsletter.title|add:" newsletter"|title actionhere=action|add:" confirmation"|title %}{{titlehere}}&nbsp;{{actionhere}}{% endblocktrans %}</h1>
 <hr class="mt-0 mb-4">
 <p>Welcome, {{ user }}!</p>
 
 {% if messages %}
-<ul>
+<ul class="medium-txt">
     {% for message in messages %}
     <li>{{ message }}</li>
     {% endfor %}
 </ul>
 {% else %}
 
-{% trans "Do you want to unsubscribe from this newsletter?" %}
 <form enctype="multipart/form-data" method="post" action="{% url "newsletter_unsubscribe_confirm" newsletter.slug %}">
     {% csrf_token %}
-    <p><input id="id_submit" name="submit" value="{% trans "Unsubscribe" %}" type="submit" /></p>
+    <p class="medium-txt">{% trans "Do you want to unsubscribe from this newsletter?" %}</p>
+    <input class="btn btn-danger" id="id_submit" name="submit" value="{% trans "Unsubscribe" %}" type="submit" />
 </form>
 {% endif %}
 </div>

@@ -1,21 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 {% block content %}
 <div class="glb">
 <div class="glb-h">
 <div class="glb-h-e">
-<h1 class="large-txt">{% trans "Newsletter subscribe" %} {{ newsletter.title }}</h1>
+<h1 class="large-txt">{% blocktrans with titlehere=newsletter.title|add:" newsletter"|title actionhere=action|title %}{{titlehere}}&nbsp;{{actionhere}}{% endblocktrans %}</h1>
 <hr class="mt-0 mb-4">
 {% if error %}
         <p class="medium-txt">{% trans "Due to a technical error we were not able to submit your confirmation email. This could be because your email address is invalid." %}</p>
-        {% comment %} Replace the the following dummy with a valid email address and remove this comment.
-        <p>{% trans "If the error persists, please don't hesitate to contact us at the following email address:" %} <a href="mailto:info@foobar.com">info@foobar.com</a></p>
-        {% endcomment %}
+        <p class="medium-txt">{% trans "If the error persists, please don't hesitate to contact us." %}</p>
 {% else %}
-    <form enctype="multipart/form-data" method="post" action=".">
+    <form class="medium-txt col-md-6" enctype="multipart/form-data" method="post" action=".">
         {% csrf_token %}
-        {{ form.as_p }}
-        <p><input id="id_submit" name="submit" value="{% trans "Subscribe" %}" type="submit" /></p>
+        {{ form|crispy }}
+        <input class="btn btn-success" id="id_submit" name="submit" value="{% trans "Subscribe" %}" type="submit" /></p>
     </form>
 {% endif %}
 </div>

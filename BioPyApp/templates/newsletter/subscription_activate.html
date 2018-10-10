@@ -5,13 +5,12 @@
 <div class="glb">
 <div class="glb-h">
 <div class="glb-h-e">
-<h1 class="large-txt">
-<h1 class="large-txt">{% blocktrans with titlehere=newsletter.title|add:" newsletter"|title actionhere=action|add:" activation"|title %}{{titlehere}}{{actionhere}}{% endblocktrans %}</h1>
+<h1 class="large-txt">{% blocktrans with titlehere=newsletter.title|add:" newsletter"|title actionhere=action|add:" activation"|title %}{{titlehere}}&nbsp;{{actionhere}}{% endblocktrans %}</h1>
 <hr class="mt-0 mb-4">
-<form enctype="multipart/form-data" method="post" action=".">
+<form class="col-md-6 medium-txt" enctype="multipart/form-data" method="post" action=".">
 {% csrf_token %}
 {{ form|crispy }}
-<input class="btn btn-success" id="id_submit" name="submit" value="{% trans "Activate" %}" type="submit" />
+<input class="btn btn-primary" id="id_submit" name="submit" value="{% trans "Activate" %}" type="submit" />
 </form>
 </div>
 </div>
