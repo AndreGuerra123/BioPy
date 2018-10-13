@@ -8,10 +8,10 @@ django = "*"
 djangorestframework = "*"
 django-crispy-forms = "*"
 django-allauth = "*"
-"psycopg2" = "*"
 gunicorn = "*"
 whitenoise = "*"
 django-newsletter = {editable = true, git = "https://github.com/dokterbob/django-newsletter.git"}
+"psycopg2-binary" = "*"
 
 [dev-packages]
 pylint = "<2.0.0"

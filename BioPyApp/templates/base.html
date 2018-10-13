@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 <html>
 
@@ -134,7 +135,7 @@
             <footer class="fakefooter">
                 <div class= "glb">
                   <div class="glb-h"> 
-                    <div class="glb-h-e">
+                    <div class="glb-h-left">
                       <h2 class="large-txt">More</h2>
                         <div>
                           <a href="/about"><p class="small-txt">About</p></a>
@@ -142,17 +143,29 @@
                           <a href="/contacts"><p  class="small-txt">Contacts</p></a>
                         </div> 
                     </div>
-                    <div class="glb-h-e">
+                    <div class="glb-h-left">
                       <h2 class="large-txt">Follow</h2>
                         <div class="glb-h">
-                          <a href="/" class="glb-h-e zocial icon facebook"></a>
-                          <a href="/" class="glb-h-e zocial icon twitter"></a>
-                          <a href="/" class="glb-h-e zocial icon instagram"></a>
+                          <a href="/" class="glb-h-e"><button class="zocial icon facebook"></button></a>
+                          <a href="/" class="glb-h-e"><button class="zocial icon instagram"></button></a>
+                          <a href="/" class="glb-h-e"><button class="zocial icon twitter"></button></a>
                         </div>
                     </div>
+
+                    
+                    <form class="col-md-3 glb-h-left" enctype="multipart/form-data" method="post" action="/newsletter/general/subscribe/">
+                    {% csrf_token %}                    
+                    <h2 class="large-txt">Newsletter</h2>
+                    <div class="glb-h">                    
                     <div class="glb-h-e">
-                      <h2 class="large-txt">Newsletter</h2>
+                    <input type="email" name="email_field" required="" id="id_email_field" placeholder={% trans "E-mail Address" %}>
                     </div>
+                    <div class="glb-h-e">
+                    <button class="btn btn-success" id="id_submit" name="submit" value="Subscribe" type="submit">Subscribe</button>
+                    </div>
+                    </div>         
+                    </form>
+                    
                   </div>
                   <div style="text-align:center">
                     <span class="small-txt">Designed and developed in Newcastle University by Andre Guerra.<br>

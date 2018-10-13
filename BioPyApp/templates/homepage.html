@@ -1,8 +1,12 @@
 {% load static %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 <html>
 <link rel="stylesheet" href="{% static 'css/global.css' %}">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<!-- Zocial -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/css-social-buttons/1.3.0/css/zocial.min.css">
+
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
  
 <head style="background-color:#1a263d">
@@ -15,39 +19,45 @@
   
   </div>
   <footer class="fakefooter">
-  <div class= "glb">
-    <div class="glb-h"> 
-      <div class="glb-h-e">
-        <h2 class="large-txt">More</h2>
-        <div>
-          <a href="/about"><p class="small-txt">About</p></a>
-          <a href="/terms"><p  class="small-txt">Terms &amp; Conditions</p></a>
-          <a href="/contacts"><p  class="small-txt">Contacts</p></a>
-        </div> 
-      </div>
-      <div class="glb-h-e">
-        <h2 class="large-txt">Follow</h2>
-        <div class="glb-h">
-          <a href="/" class="glb-h-e"><img src="{% static "icons/42/face-42.png" %}" height="42" width="42" /></a>
-          <a href="/" class="glb-h-e"><img src="{% static "icons/42/twit-42.png" %}" height="42" width="42" /></a>
-          <a href="/" class="glb-h-e"><img src="{% static "icons/42/insta-42.png" %}" height="42" width="42" /></a>
-        </div>
-      </div>
-      <div class="glb-h-e">
-        <h2 class="large-txt">Newsletter</h2>
-        <form enctype="multipart/form-data" method="post" action="/newsletter/general/subscribe/">
-        {% csrf_token %}
-        <input type="email" name="email_field" required="" id="id_email_field" placeholder="E-mail address">
-        <button class="btn btn-success" id="id_submit" name="submit" value="Subscribe" type="submit">Subscribe</button>
-        {{ form|crispy }}        
-        </form>
-      </div>
-    </div>
-    <div style="text-align:center">
-      <span class="small-txt">Designed and developed in Newcastle University by Andre Guerra.<br>
-      <span class="small-txt">© 2018 ITN,Biorapid - Rapid Bioprocess Development. All rights reserved. </span>
-    </div>
-  </div>
-</footer>
+                <div class= "glb">
+                  <div class="glb-h"> 
+                    <div class="glb-h-left">
+                      <h2 class="large-txt">More</h2>
+                        <div>
+                          <a href="/about"><p class="small-txt">About</p></a>
+                          <a href="/terms"><p  class="small-txt">Terms &amp; Conditions</p></a>
+                          <a href="/contacts"><p  class="small-txt">Contacts</p></a>
+                        </div> 
+                    </div>
+                    <div class="glb-h-left">
+                      <h2 class="large-txt">Follow</h2>
+                        <div class="glb-h">
+                          <a href="/" class="glb-h-e"><button class="zocial icon facebook"></button></a>
+                          <a href="/" class="glb-h-e"><button class="zocial icon instagram"></button></a>
+                          <a href="/" class="glb-h-e"><button class="zocial icon twitter"></button></a>
+                        </div>
+                    </div>
+
+                    
+                    <form class="col-md-3 glb-h-left" enctype="multipart/form-data" method="post" action="/newsletter/general/subscribe/">
+                    {% csrf_token %}                    
+                    <h2 class="large-txt">Newsletter</h2>
+                    <div class="glb-h">                    
+                    <div class="glb-h-e">
+                    <input type="email" name="email_field" required="" id="id_email_field" placeholder={% trans "E-mail Address" %}>
+                    </div>
+                    <div class="glb-h-e">
+                    <button class="btn btn-success" id="id_submit" name="submit" value="Subscribe" type="submit">Subscribe</button>
+                    </div>
+                    </div>         
+                    </form>
+                    
+                  </div>
+                  <div style="text-align:center">
+                    <span class="small-txt">Designed and developed in Newcastle University by Andre Guerra.<br>
+                    <span class="small-txt">© 2018 ITN,Biorapid - Rapid Bioprocess Development. All rights reserved. </span>
+                  </div>
+                  </div>
+            </footer>
 </body>
 </html>
