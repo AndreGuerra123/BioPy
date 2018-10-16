@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+    <div class="glb">
+    <div class="glb-v">   
+    <div class="glb-v-e">
+    <h1 class="large-txt">{% blocktrans with titlehere='contact us'|title %}{{titlehere}}{% endblocktrans %}</h1>
+    <hr class="mt-0 mb-4">
+    <p class="medium-txt">Your contact request was successfully sent. We will be in contact shortly. Thank you.</p>
+    </div>
+    </div>
+    </div>
+{% endblock content %}

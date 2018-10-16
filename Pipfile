@@ -12,6 +12,10 @@ gunicorn = "*"
 whitenoise = "*"
 django-newsletter = {editable = true, git = "https://github.com/dokterbob/django-newsletter.git"}
 "psycopg2-binary" = "*"
+python-dotenv = "*"
+django-contact-form = "*"
+opcua = "*"
+cryptography = "*"
 
 [dev-packages]
 pylint = "<2.0.0"

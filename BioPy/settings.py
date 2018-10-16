@@ -9,17 +9,26 @@ https://docs.djangoproject.com/en/2.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
-
 import os
+import dotenv
 
 #Setting base directory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = os.environ['SECRET_KEY']
+#importing env variables
+#this approach works really well for development aswell as production (heroku):
+    #if .env file exists at root of project, then loads the variables.
+    #else, in heroku, it does not: it uses the declared variables elsewhere.
+
+dotenv_file = os.path.join(BASE_DIR, ".env")
+if os.path.isfile(dotenv_file):
+    dotenv.load_dotenv(dotenv_file)
+
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1',os.environ['HOST']]
+ALLOWED_HOSTS = ['127.0.0.1','localhost',os.getenv('SITE_DOMAIN')]
 
 ROOT_URLCONF = 'BioPy.urls'
 
@@ -29,18 +38,22 @@ LOGOUT_REDIRECT_URL = '/goodbye'
 
 
 # Ensure SITE_ID is set sites app 
-SITE_ID = 1
+SITE_ID = os.getenv('SITE_ID')
 
 # Add the 'allauth' backend to AUTHENTICATION_BACKEND and keep default ModelBackend
 AUTHENTICATION_BACKENDS = [ 'django.contrib.auth.backends.ModelBackend',
                            'allauth.account.auth_backends.AuthenticationBackend'] 
 
-# EMAIL_BACKEND so allauth can proceed to send confirmation emails
-# ONLY for development/testing use console 
+# EMAIL_BACKEND
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend'
+EMAIL_USE_TLS = True 
 
 # Custom allauth settings
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[BioPy]"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = os.getenv('SITE_NAME')
 ACCOUNT_AUTHENTICATION_METHOD="username_email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
@@ -59,12 +72,12 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.environ['DB_ENGINE'],
-        'NAME': os.environ['DB_NAME'],
-        'USER': os.environ['DB_USER'],
-        'PASSWORD': os.environ['DB_PASS'],
-        'HOST': os.environ['DB_HOST'],
-        'PORT': os.environ['DB_PORT'],
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('USER'),
+        'PASSWORD': os.getenv('PASS'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
@@ -86,7 +99,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.openid',
     'sorl.thumbnail',
-    'newsletter'
+    'newsletter',
+    'contact_form'
 
 ]
 

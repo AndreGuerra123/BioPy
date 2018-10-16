@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+    <div class="glb">
+    <div class="glb-v">   
+    <div class="glb-v-e">
+    <h1 class="large-txt">{% blocktrans with titlehere='contact us'|title %}{{titlehere}}{% endblocktrans %}</h1>
+    <hr class="mt-0 mb-4">
+    </div>
+    <div class="glb-v-e">
+    <form method="post" class="medium-txt">
+            {% csrf_token %}
+            <label for="name">{% trans 'Name' %}</label><br>
+            <input id="name" type="text" name="name" placeholder="Your name..."><br><br>
+            <label for="email">{% trans 'Email' %}</label><br>
+            <input id="email" type="text" name="email" placeholder="Your email..."><br><br>
+            <label for="message">{% trans 'Message' %}</label><br>
+            <textarea id="message" name="body" rows="10" cols="50" placeholder="Your message..."></textarea><br><br>
+            <input class="btn btn-success" type="submit" value="Submit">
+    </form>
+    </div>
+    </div>
+    </div>
+    </div>
+
+{% endblock content %}

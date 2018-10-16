@@ -4,7 +4,7 @@
 <div class="glb">
 <div class="glb-h">
 <div class="glb-h-e">
-<h1 class="large-txt">{% blocktrans with titlehere=newsletter.title|add:" newsletter"|title actionhere=action|add:" confirmed"|title %}{{titlehere}}&nbsp;{{actionhere}}{% endblocktrans %}</h1>
+<h1 class="large-txt">{% blocktrans with titlehere=newsletter.title|title actionhere=action|add:" confirmed"|title %}{{titlehere}}&nbsp;{{actionhere}}{% endblocktrans %}</h1>
 <hr class="mt-0 mb-4">
 <p class="medium-txt">{% trans "You have successfully been unsubscribed." %}</p>
 </div>

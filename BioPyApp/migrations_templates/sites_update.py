@@ -3,8 +3,8 @@ from django.db import migrations
 
 def update_site(apps, schema_editor):
     SiteModel = apps.get_model('sites', 'Site')
-    SiteModel.objects.update_or_create(id=os.environ['SITE_ID'],
-    defaults={'domain':os.environ['SITE_DOMAIN'],'name':os.environ['SITE_NAME']})
+    SiteModel.objects.update_or_create(id=os.getenv('SITE_ID'),
+    defaults={'domain':os.getenv('SITE_DOMAIN'),'name':os.getenv('SITE_NAME')})
 
 
 class Migration(migrations.Migration):

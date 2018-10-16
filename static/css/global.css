@@ -281,6 +281,10 @@ a.article, a.article:hover {
 
 }
 
+.description {
+    color:	#97c5fd
+}
+
 .table-borderless>thead>tr>th
 .table-borderless>thead>tr>td
 .table-borderless>tbody>tr>th

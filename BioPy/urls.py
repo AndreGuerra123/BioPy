@@ -23,8 +23,8 @@ urlpatterns = [
 
     path('home/',views.HomeView.as_view(),name="home"),
 
-    path('contacts/',views.ContactsView.as_view(),name="contacts"), 
-
+    path('contacts/',include('contact_form.urls')),
+    
     path('terms/',views.TermsView.as_view(),name="terms"),
 
     path('about/',views.AboutView.as_view(),name="about"),
@@ -39,7 +39,23 @@ urlpatterns = [
 
     path('newsletter/',include('newsletter.urls')),
 
-    # General
+    # Real-time
+    path('servers/',views.ServerList.as_view()),
+    path('servers/<pk>/', views.ServerDetail.as_view()),
+
+    path('endpoints/',views.EndpointList.as_view()),
+    path('endpoints/<pk>/', views.EndpointDetail.as_view()),
+
+
+    path('configurations/',views.ConfigurationList.as_view()),
+    path('configurations/<pk>/', views.ConfigurationDetail.as_view()),
+
+
+    path('nodes/',views.NodeList.as_view()),
+    path('nodes/<pk>/', views.NodeDetail.as_view()),
+
+
+    # Historian
 
     path('processes/', views.ProcessList.as_view()),
 

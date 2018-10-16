@@ -4,7 +4,7 @@
 <div class="glb">
 <div class="glb-h">
 <div class="glb-h-e">
-<h1 class="large-txt">{% blocktrans with titlehere=newsletter.title|add:" newsletter"|title actionhere=action|add:" verification"|title %}{{titlehere}}&nbsp;{{actionhere}}{% endblocktrans %}</h1>
+<h1 class="large-txt">{% blocktrans with titlehere=newsletter.title|title actionhere=action|add:" verification"|title %}{{titlehere}}&nbsp;{{actionhere}}{% endblocktrans %}</h1>
 <hr class="mt-0 mb-4">
 <p class="medium-txt">{% trans "Your subscription request was successfully received and an activation email has been sent to you. In that email you will find a link which you need to follow in order to activate your subscription." %}</p>
 </div>

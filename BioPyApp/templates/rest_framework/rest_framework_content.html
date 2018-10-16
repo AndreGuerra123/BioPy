@@ -2,24 +2,24 @@
 {% load i18n %}
 {% load rest_framework %}
 
-{% comment %} Everything will reside inside this block {% endcomment %}
-<div class="glb">
-
 {% comment %} JS {% endcomment %}
+
+<script>
+$(document).ready(function() {
+    $('form').ajaxForm();
+});
+</script>
 <script>
 window.drf = {
     csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
     csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}"
 };
 </script>
-<script src="{% static "rest_framework/js/ajax-form.js" %}"></script>
-<script src="{% static "rest_framework/js/prettify-min.js" %}"></script>
-<script src="{% static "rest_framework/js/default.js" %}"></script>
-<script>
-$(document).ready(function() {
-    $('form').ajaxForm();
-});
-</script>
+
+
+
+{% comment %} Everything will reside inside this block {% endcomment %}
+<div class="glb">
 
 {% comment %} TITLE {% endcomment %}
 <h1 class="large-txt">{{ name }}</h1>
@@ -28,10 +28,10 @@ $(document).ready(function() {
 {% comment %} DESCRIPTION {% endcomment %}
 {% if description %}
 <h2 class="large-txt">{% trans 'Description' %}</h2>
-        <hr class="mt-0 mb-4">
-<div class="glb-h">
+<hr class="mt-0 mb-4">
+<div class="glb-h medium-txt">
     <div class="glb-h-e">        
-        {{description}}
+      <b class="medium-txt"> {{description}}</b>
     </div>
 </div>
 {% endif %}          
