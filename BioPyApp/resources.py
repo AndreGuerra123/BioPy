@@ -7,19 +7,14 @@ from BioPyApp import models
 
 
 class VariableResource(resources.ModelResource):
-    timestamp = fields.Field(attribute='timestamp',column_name='timestamp')
+    process = fields.Field(attribute='process',column_name='process',widget=ForeignKeyWidget(models.Process,'name'))
     batch = fields.Field(attribute='batch',column_name='batch',widget=ForeignKeyWidget(models.Batch, 'name'))   
-    name = fields.Field(attribute='name',column_name='name')
-    value = fields.Field(attribute='value',column_name='value')
 
     class Meta:
         model = models.Variable
         exclude = ('created','modified')
-        export_order = ('id', 'timestamp', 'batch', 'name','value')
-
-    
-     
-
+        export_order = ('id', 'timestamp','process', 'batch', 'name','value')
+ 
 class EventResource(resources.ModelResource):
     timestamp = fields.Field(attribute='timestamp',column_name='timestamp')
     batch = fields.Field(attribute='batch',column_name='batch',widget=ForeignKeyWidget(models.Batch, 'name'))   
