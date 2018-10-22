@@ -4,46 +4,56 @@ from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.forms.models import InlineForeignKeyField
-from opcua.ua.ua_binary import nodeid_from_binary
-
-class Server(models.Model):
-    owner = models.ForeignKey(User,on_delete=models.CASCADE)
-    host = models.CharField(null=False,blank=False,max_length=100)
-    port = models.PositiveIntegerField(null=False,blank=False,validators=[MinValueValidator(1024),MaxValueValidator(65535)])
-    username = models.CharField(null=True,blank=True,max_length=100)
-    password = models.CharField(null=True,blank=True,max_length=100)
-    certificate = models.FileField(blank=True,null=True)
-    privatekey = models.FileField(blank=True,null=True)
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ('owner','host','port')
+from urllib.parse import urlparse
+from django.core.exceptions import ValidationError
 
 class Endpoint(models.Model):
-    server = models.ForeignKey(to=Server,on_delete=models.CASCADE)
-    url = models.CharField(unique=True, max_length=200)
+    POLICIES=[('POLICY1','policy'),('POLICY2','policy2')]
+    MODES=[('MODE1','Mode1')]
+    owner = models.ForeignKey(User,on_delete=models.CASCADE)
+    url = models.CharField(max_length=200)
+    policy = models.CharField(choices=POLICIES,max_length=50)
+    mode = models.CharField(choices=MODES,max_length=50)
+    certificate = models.FileField(blank=True,null=True)
+    private_key = models.FileField(blank=True,null=True)
+    server_certificate = models.FileField(blank=True,null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        unique_together = ('server','url')
+    def validate_unique(self,exclude=None):
+        existing = [ep.url for ep in Endpoint.objects.filter(owner=self.owner)]
+        if not self.unique_url(self.url,existing):
+            raise ValidationError({'url':['Endpoint url must have unique hostname, port and path combination per user.',]})
+    
+    def unique_url(self,url,urls):
+        for urlt in urls:
+            if self.is_equal_url(url,urlt):
+                return False
+        return True
 
-class Configuration(models.Model):
-    endpoint = models.ManyToManyField(to=Endpoint)
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
+    def is_equal_url(self,url1,url2):
+        url1_parsed = urlparse(url1)
+        url2_parsed = urlparse(url2)
+        if(url1_parsed.netloc == url2_parsed.netloc and url1_parsed.path==url2_parsed.path):
+            return True
+        else:
+            return False
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        super(Endpoint, self).save(*args, **kwargs)
+
+        
 
 class Node(models.Model):
     TYPES=[("variable","Variable"),("classsifier","Classifier"),("event","Event"),("spectrum","Spectrum")]
-    configuration = models.ForeignKey(to=Configuration,on_delete=models.CASCADE)
+    endpoint = models.ForeignKey(to=Endpoint,on_delete=models.CASCADE)
     nodeid = models.CharField(max_length=100)
     type = models.CharField(choices=TYPES, max_length=10)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-
     class Meta:
-        unique_together= ('configuration','nodeid')
+        unique_together= ('endpoint','nodeid')
 
 class Process(models.Model):
     PROCESS_TYPES=(
@@ -89,7 +99,7 @@ class Batch(models.Model):
 class Variable(models.Model):
     batch = models.ForeignKey('Batch',on_delete=models.CASCADE)
     name = models.CharField(max_length=25)
-    date = models.DateTimeField()
+    timestamp = models.DateTimeField()
     value = models.FloatField()
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -100,7 +110,7 @@ class Variable(models.Model):
 class Event(models.Model):
     batch = models.ForeignKey('Batch',on_delete=models.CASCADE)
     name = models.CharField(max_length=25)
-    date = models.DateTimeField()
+    timestamp = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -111,7 +121,6 @@ class Class(models.Model):
     batch = models.ForeignKey('Batch',on_delete=models.CASCADE)
     name = models.CharField(max_length=25)
     value = models.CharField(max_length=25)
-    prior = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 

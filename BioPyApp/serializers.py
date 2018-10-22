@@ -1,9 +1,9 @@
-from .models import Batch, Class, Configuration, Endpoint, Event, Node, \
-    Process, Server, Variable
+from .models import Batch, Class, Endpoint, Event, Node, Process, Variable
 from django.contrib.auth.models import User
-from django.core import serializers
+#from django.core import serializers
 from rest_framework import serializers
-
+from rest_framework.exceptions import ValidationError
+from urllib.parse import urlparse
 
 ### Serializer Fields ###
 
@@ -31,53 +31,47 @@ class BatchSerializerField(serializers.PrimaryKeyRelatedField):
         else:
             return Batch.objects.filter(process__owner=user)
 
-class ServerSerializerField(serializers.PrimaryKeyRelatedField):
-    def get_queryset(self):
-        user = self.context['request'].user
-        if user.is_superuser:
-            return Server.objects.all()
-        else:
-            return Server.objects.filter(owner=user)
-
 class EndpointSerializerField(serializers.PrimaryKeyRelatedField):
-    many=True
     def get_queryset(self):
         user = self.context['request'].user
         if user.is_superuser:
             return Endpoint.objects.all()
         else:
-            return Endpoint.objects.filter(server__owner=user)
+            return Endpoint.objects.filter(endpoint__owner=user)
 
-class ConfigurationSerializerField(serializers.PrimaryKeyRelatedField):
-    def get_queryset(self):
-        user = self.context['request'].user
-        if user.is_superuser:
-            return Configuration.objects.all()
-        else:
-            return Configuration.objects.filter(endpoint__server__owner=user)
 
 ### Serializers ###            
-
-class ServerSerializer(serializers.ModelSerializer):
-    owner=OwnerSerializerField()
-    class Meta:
-        model = Server
-        fields = "__all__"
-
 class EndpointSerializer(serializers.ModelSerializer):
-    server=ServerSerializerField()
+    owner=OwnerSerializerField()
     class Meta:
         model = Endpoint
         fields = "__all__"
 
-class ConfigurationSerializer(serializers.ModelSerializer):
-    endpoint=EndpointSerializerField()
-    class Meta:
-        model = Configuration
-        fields = "__all__"
+    def validate_url(self,value):
+        owner = self.get_initial().get('owner')
+        existing = [ep.url for ep in Endpoint.objects.filter(owner=owner)]
+        if not self.unique_url(value,existing):
+            raise ValidationError('Endpoint url must an unique hostname, port and path combination per user.')
+        return value
+
+    def unique_url(self,url,urls):
+        for urlt in urls:
+            if self.is_equal_url(url,urlt):
+                return False
+        return True
+
+    def is_equal_url(self,url1,url2):
+        url1_parsed = urlparse(url1)
+        url2_parsed = urlparse(url2)
+        if(url1_parsed.netloc == url2_parsed.netloc and url1_parsed.path==url2_parsed.path):
+            return True
+        else:
+            return False
+
+        
 
 class NodeSerializer(serializers.ModelSerializer):
-    configuration = ConfigurationSerializerField()
+    endpoint = EndpointSerializerField()
     class Meta:
         model = Node
         fields = "__all__"

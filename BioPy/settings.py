@@ -100,7 +100,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.openid',
     'sorl.thumbnail',
     'newsletter',
-    'contact_form'
+    'contact_form',
+    'import_export'
 
 ]
 

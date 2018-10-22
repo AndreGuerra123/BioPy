@@ -15,5 +15,8 @@ python manage.py migrate
 cp -a ./BioPyApp/migrations_templates/. ./BioPyApp/migrations/
 python manage.py migrate
 
+#collect static
+python manage.py collectstatic
+
 #run server
 python manage.py runserver

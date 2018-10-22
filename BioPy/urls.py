@@ -14,8 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
+
 from BioPyApp import views
+from BioPyApp.models import Variable, Event, Class
+
 
 urlpatterns = [
 
@@ -39,23 +42,44 @@ urlpatterns = [
 
     path('newsletter/',include('newsletter.urls')),
 
-    # Real-time
-    path('servers/',views.ServerList.as_view()),
-    path('servers/<pk>/', views.ServerDetail.as_view()),
+    # Actions
+    path('actions/',views.ActionsView.as_view()),
+    
+    ## Data acquisition
+    path('actions/acquisition/',views.AcquisitionView.as_view()),
 
+    ### Real-time OPCUA
+
+    ### Historian OPCUA
+
+    ### Remote Databases
+
+    ### Import Files
+    path('actions/acquisition/import/',views.ImportView.as_view()),
+    path('actions/acquisition/import/variables/', views.FileImport.as_view(model=Variable)),
+    path('actions/acquisition/import/variables/processing/', views.FileImportProcessing.as_view(model=Variable)),
+    path('actions/acquisition/import/events/', views.FileImport.as_view(model=Event)),
+    path('actions/acquisition/import/events/processing/', views.FileImportProcessing.as_view(model=Event)),
+    path('actions/acquisition/import/classes/', views.FileImport.as_view(model=Class)),
+    path('actions/acquisition/import/classes/processing/', views.FileImportProcessing.as_view(model=Class)),
+
+
+
+
+
+
+
+
+    # API
+    ## Real-time
+   
     path('endpoints/',views.EndpointList.as_view()),
     path('endpoints/<pk>/', views.EndpointDetail.as_view()),
-
-
-    path('configurations/',views.ConfigurationList.as_view()),
-    path('configurations/<pk>/', views.ConfigurationDetail.as_view()),
-
 
     path('nodes/',views.NodeList.as_view()),
     path('nodes/<pk>/', views.NodeDetail.as_view()),
 
-
-    # Historian
+    ## Historian
 
     path('processes/', views.ProcessList.as_view()),
 

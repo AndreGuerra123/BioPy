@@ -16,6 +16,7 @@ python-dotenv = "*"
 django-contact-form = "*"
 opcua = "*"
 cryptography = "*"
+django-import-export = "*"
 
 [dev-packages]
 pylint = "<2.0.0"
