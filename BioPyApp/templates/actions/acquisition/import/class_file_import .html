@@ -2,60 +2,45 @@
 {% load i18n %}
 {% load admin_urls %}
 {% load import_export_tags %}
+{% load crispy_form_tags %}
 {% block content %}
 <div class="glb">
-<h2 class="large-txt">{% blocktrans %}Import {{name}}{% endblocktrans %}</h2>
+<h2 class="large-txt">{% blocktrans %}Import Variables}{% endblocktrans %}</h2>
 <hr class="mt-0 mb-4">
 <div class="glb-h">
 <div class="glb-h-e">
 {% if confirm_form %}
-  <form action="{% url opts|admin_urlname:"process_import" %}" method="POST">
-    {% csrf_token %}
-    {{ confirm_form.as_p }}
-    <p>
-      {% trans "Below is a preview of data to be imported. If you are satisfied with the results, click 'Confirm import'" %}
-    </p>
+  <form class="medium-txt col-md-6" action="{% url "import_variables_processing" %}" method="POST">
+    {{% confirm_form|crispy %}}
+    <p class="medium-txt">{% trans "Below is a preview of variables data to be imported. If you are satisfied with the results, click 'Confirm'" %}</p>
     <div class="submit-row">
-      <input type="submit" class="default" name="confirm" value="{% trans "Confirm import" %}">
+      <input type="submit" class="btn btn-success" name="confirm" value="{% trans "Confirm" %}">
     </div>
   </form>
 
 {% else %}
-  <form action="" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-
-    <p>
-      {% trans "This importer will import the following fields: " %}
-      <code>{{ fields|join:", " }}</code>
-    </p>
-
-    <fieldset class="module aligned">
+  <form class="medium-txt col-md-6" action="" method="post" enctype="multipart/form-data">
+    <p class="medium-txt">{% trans "This importer will import the following fields: " %}<code>{{ fields|join:", " }}</code></p>
+    <fieldset class="module aligned medium-txt">
       {% for field in form %}
         <div class="form-row">
           {{ field.errors }}
-
           {{ field.label_tag }}
-
           {{ field }}
-
           {% if field.field.help_text %}
           <p class="help">{{ field.field.help_text|safe }}</p>
           {% endif %}
         </div>
       {% endfor %}
     </fieldset>
-
-    <div class="submit-row">
-      <input type="submit" class="default" value="{% trans "Submit" %}">
-    </div>
+    <input type="submit" class="btn btn-success" value="{% trans "Submit" %}">
   </form>
 {% endif %}
 
 {% if result %}
-
   {% if result.has_errors %}
-    <h2>{% trans "Errors" %}</h2>
-    <ul>
+    <h2 class="large-txt">{% trans "Errors" %}</h2>
+    <ul class="medium-txt">
       {% for error in result.base_errors  %}
       <li>
         {{ error.error }}
@@ -74,10 +59,8 @@
     </ul>
   {% else %}
 
-  <h2>
-    {% trans "Preview" %}
-  </h2>
-  <table>
+  <h2 class="large-txt">{% trans "Preview" %}</h2>
+  <table class="medium-txt">
     <thead>
       <tr>
         <th></th>
@@ -108,7 +91,6 @@
     {% endfor %}
   </table>
   {% endif %}
-
   {% endif %}
 </div>
 </div>

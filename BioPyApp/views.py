@@ -1,27 +1,27 @@
 import os
 import tempfile
-from django.urls import reverse
-from django.http import HttpResponseRedirect
 
 from .models import Batch, Class, Endpoint, Event, Node, Process, Variable
 from .permissions import hasBatchPermission, hasDataPermission, \
     hasEndpointPermission, hasNodePermission, hasProcessPermission
+from .resources import ClassResource, EventResource, VariableResource
 from .serializers import BatchSerializer, ClassSerializer, EndpointSerializer, \
     EventSerializer, NodeSerializer, ProcessSerializer, VariableSerializer
+from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
+from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.encoding import force_text
 from django.views import generic
+from import_export.formats import base_formats
+from import_export.forms import ConfirmImportForm, ImportForm
+from import_export.resources import RowResult, modelresource_factory
 from rest_framework import generics
 
-
-from import_export.formats import base_formats
-from import_export.resources import modelresource_factory, RowResult
-from import_export.forms import ImportForm, ConfirmImportForm
-from django.utils.encoding import force_text
-from django.template.response import TemplateResponse
-from django.contrib.contenttypes.models import ContentType
-from django.contrib import messages
 
 # Universal
 
@@ -61,12 +61,9 @@ class ImportView(generic.TemplateView):
     template_name = 'actions/acquisition/import/import.html'
 #### FileImport   
 @method_decorator(login_required,name='dispatch')
-class FileImport(generic.View):
-    model=None
+class VariableFileImport(generic.View):
     from_encoding = "utf-8"
-
-    #: import / export formats
-    DEFAULT_FORMATS = (
+    formats = (
         base_formats.CSV,
         base_formats.XLS,
         base_formats.TSV,
@@ -75,28 +72,14 @@ class FileImport(generic.View):
         base_formats.YAML,
         base_formats.HTML,
     )
-    formats = DEFAULT_FORMATS
-    #: template for import view
-    import_template_name = 'actions/acquisition/import/file_import.html'
-    resource_class = None
+    import_template_name = 'actions/acquisition/import/variable_file_import.html'
+    resource = VariableResource()
 
     def get_import_formats(self):
         """
         Returns available import formats.
         """
         return [f for f in self.formats if f().can_import()]
-
-    def get_resource_class(self):
-        if not self.resource_class:
-            return modelresource_factory(self.model)
-        else:
-            return self.resource_class
-
-    def get_import_resource_class(self):
-        """
-        Returns ResourceClass to use for import.
-        """
-        return self.get_resource_class()
 
     def get(self, *args, **kwargs ):
         '''
@@ -105,8 +88,6 @@ class FileImport(generic.View):
         uploaded file to a local temp file that will be used by
         'process_import' for the actual import.
         '''
-        resource = self.get_import_resource_class()()
-
         context = {}
 
         import_formats = self.get_import_formats()
@@ -133,7 +114,7 @@ class FileImport(generic.View):
                 if not input_format.is_binary() and self.from_encoding:
                     data = force_text(data, self.from_encoding)
                 dataset = input_format.create_dataset(data)
-                result = resource.import_data(dataset, dry_run=True,
+                result = self.resource.import_data(dataset, dry_run=True,
                                               raise_errors=False)
 
             context['result'] = result
@@ -144,10 +125,8 @@ class FileImport(generic.View):
                     'input_format': form.cleaned_data['input_format'],
                 })
 
-        context['name'] = self.model.__name__
         context['form'] = form
-        context['opts'] = self.model._meta
-        context['fields'] = [f.column_name for f in resource.get_fields()]
+        context['fields'] = [f.column_name for f in self.resource.get_fields()]
 
         return TemplateResponse(self.request, [self.import_template_name], context)
 
@@ -158,10 +137,7 @@ class FileImport(generic.View):
         uploaded file to a local temp file that will be used by
         'process_import' for the actual import.
         '''
-        resource = self.get_import_resource_class()()
-
         context = {}
-
         import_formats = self.get_import_formats()
         form = ImportForm(import_formats,
                           self.request.POST or None,
@@ -186,7 +162,7 @@ class FileImport(generic.View):
                 if not input_format.is_binary() and self.from_encoding:
                     data = force_text(data, self.from_encoding)
                 dataset = input_format.create_dataset(data)
-                result = resource.import_data(dataset, dry_run=True,
+                result = self.resource.import_data(dataset, dry_run=True,
                                               raise_errors=False)
 
             context['result'] = result
@@ -197,20 +173,16 @@ class FileImport(generic.View):
                     'input_format': form.cleaned_data['input_format'],
                 })
 
-        context['name'] = self.model.__name__
         context['form'] = form
-        context['opts'] = self.model._meta
-        context['fields'] = [f.column_name for f in resource.get_fields()]
+        context['fields'] = [f.column_name for f in self.resource.get_fields()]
 
         return TemplateResponse(self.request, [self.import_template_name], context)
-#### FileProcessingImport
-@method_decorator(login_required,name='dispatch')
-class FileImportProcessing(generic.View):
-    model=None
-    from_encoding = "utf-8"
 
-    #: import / export formats
-    DEFAULT_FORMATS = (
+#### VariableFileProcessingImport
+@method_decorator(login_required,name='dispatch')
+class VariableFileImportProcessing(generic.View):
+    from_encoding = "utf-8"
+    formats = (
         base_formats.CSV,
         base_formats.XLS,
         base_formats.TSV,
@@ -219,12 +191,8 @@ class FileImportProcessing(generic.View):
         base_formats.YAML,
         base_formats.HTML,
     )
-    formats = DEFAULT_FORMATS
-    #: template for import view
-    import_template_name = 'actions/acquisition/import/file_import.html'
-    resource_class = None
-
-
+    import_template_name = 'actions/acquisition/import/variable_file_import.html'
+    resource = VariableResource()
 
     def get_import_formats(self):
         """
@@ -232,25 +200,11 @@ class FileImportProcessing(generic.View):
         """
         return [f for f in self.formats if f().can_import()]
 
-    def get_resource_class(self):
-        if not self.resource_class:
-            return modelresource_factory(self.model)
-        else:
-            return self.resource_class
-
-    def get_import_resource_class(self):
-        """
-        Returns ResourceClass to use for import.
-        """
-        return self.get_resource_class()
-
     def post(self, *args, **kwargs ):
         '''
         Perform the actual import action (after the user has confirmed he
     wishes to import)
         '''
-        opts = self.model._meta
-        resource = self.get_import_resource_class()()
 
         confirm_form = ConfirmImportForm(self.request.POST)
         if confirm_form.is_valid():
@@ -268,37 +222,14 @@ class FileImportProcessing(generic.View):
                 data = force_text(data, self.from_encoding)
             dataset = input_format.create_dataset(data)
 
-            result = resource.import_data(dataset, dry_run=False,
-                                 raise_errors=True)
+            self.resource.import_data(dataset, dry_run=False, raise_errors=True)
 
-            # Add imported objects to LogEntry
-            ADDITION = 1
-            CHANGE = 2
-            DELETION = 3
-            logentry_map = {
-                RowResult.IMPORT_TYPE_NEW: ADDITION,
-                RowResult.IMPORT_TYPE_UPDATE: CHANGE,
-                RowResult.IMPORT_TYPE_DELETE: DELETION,
-            }
-            content_type_id=ContentType.objects.get_for_model(self.model).pk
-            '''
-            for row in result:
-                LogEntry.objects.log_action(
-                    user_id=request.user.pk,
-                    content_type_id=content_type_id,
-                    object_id=row.object_id,
-                    object_repr=row.object_repr,
-                    action_flag=logentry_map[row.import_type],
-                    change_message="%s through import_export" % row.import_type,
-                )
-            '''
-            success_message = _('Import finished')
+            success_message = _('Import sucessfull')
             messages.success(self.request, success_message)
             import_file.close()
+            return reverse('variable_list')
 
-            url = reverse('%s_list' % (str(opts.app_label).lower()))
-            return HttpResponseRedirect(url)
-
+#TODO: COPY ABOVE FOR EVENTS AND CLASSES 
 
 # API views
 

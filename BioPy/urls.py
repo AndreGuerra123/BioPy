@@ -56,12 +56,12 @@ urlpatterns = [
 
     ### Import Files
     path('actions/acquisition/import/',views.ImportView.as_view()),
-    path('actions/acquisition/import/variables/', views.FileImport.as_view(model=Variable)),
-    path('actions/acquisition/import/variables/processing/', views.FileImportProcessing.as_view(model=Variable)),
-    path('actions/acquisition/import/events/', views.FileImport.as_view(model=Event)),
-    path('actions/acquisition/import/events/processing/', views.FileImportProcessing.as_view(model=Event)),
-    path('actions/acquisition/import/classes/', views.FileImport.as_view(model=Class)),
-    path('actions/acquisition/import/classes/processing/', views.FileImportProcessing.as_view(model=Class)),
+    path('actions/acquisition/import/variables/', views.VariableFileImport.as_view(),name="import_variables"),
+    path('actions/acquisition/import/variables/processing/', views.VariableFileImportProcessing.as_view(),name="import_variables_processing"),
+    path('actions/acquisition/import/events/', views.EventFileImport.as_view(model=Event),name="import_events"),
+    path('actions/acquisition/import/events/processing/', views.EventFileImportProcessing.as_view(),name="import_events_processing"),
+    path('actions/acquisition/import/classes/', views.ClassFileImport.as_view(model=Class),name="import_classes"),
+    path('actions/acquisition/import/classes/processing/', views.ClassFileImportProcessing.as_view(),name="import_classes_processing"),
 
 
 
@@ -89,7 +89,7 @@ urlpatterns = [
 
     path('batches/<pk>/', views.BatchDetail.as_view()),
 
-    path('variables/', views.VariableList.as_view()),
+    path('variables/', views.VariableList.as_view(),name="variables_list"),
 
     path('variables/<pk>/', views.VariableDetail.as_view()),
 

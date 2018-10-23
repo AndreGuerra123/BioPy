@@ -17,25 +17,31 @@
   </ol>
   <div class="carousel-inner">
     <div class="carousel-item active">
-      <img class="d-block" src="{% static 'images/variables.png' %}">
-      <div class="carousel-caption d-none d-md-block">
-        <h5 class="large-txt">{% trans 'Import Variable Files' %}</h5>
-        <p class="medium-txt">{% trans 'Transfer offline variables data into BioPy.' %}</p>
-      </div>
+      <a href="{% url 'import_variables' %}">
+        <img class="d-block w-100" src={% static 'images/variables.png' %} href="{% url 'import_variables' %}">
+        <div class="carousel-caption d-none d-md-block">
+        <h5 class="large-txt">{% trans 'Import Variables Files' %}</h5>
+        <p class="medium-txt">{% trans 'Transfer variables data into BioPy.' %}</p>
+        </div>
+      </a>
     </div>
     <div class="carousel-item">
-      <img class="d-block w-100" src={% static 'images/events.png' %}>
+      <a href="{% url 'import_events' %}">
+        <img class="d-block w-100" src={% static 'images/events.png' %} href="{% url 'import_events' %}">
         <div class="carousel-caption d-none d-md-block">
-        <h5 class="large-txt">{% trans 'Import Event Files' %}</h5>
-        <p class="medium-txt">{% trans 'Transfer offline event data into BioPy.' %}</p>
-      </div>
+        <h5 class="large-txt">{% trans 'Import Events Files' %}</h5>
+        <p class="medium-txt">{% trans 'Transfer events data into BioPy.' %}</p>
+        </div>
+      </a>
     </div>
     <div class="carousel-item">
-      <img class="d-block w-100" src={% static 'images/events.png' %}>
+      <a href="{% url 'import_classes' %}">
+        <img class="d-block w-100" src={% static 'images/classes.png' %} href="{% url 'import_classes' %}">
         <div class="carousel-caption d-none d-md-block">
-        <h5 class="large-txt">{% trans 'Import Class Files' %}</h5>
-        <p class="medium-txt">{% trans 'Transfer offline classification data into BioPy.' %}</p>
-      </div>
+        <h5 class="large-txt">{% trans 'Import Classification Files' %}</h5>
+        <p class="medium-txt">{% trans 'Transfer classification data into BioPy.' %}</p>
+        </div>
+      </a>
     </div>
   </div>
   <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">

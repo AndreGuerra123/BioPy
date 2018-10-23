@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load admin_urls %}
+{% load import_export_tags %}
+{% load crispy_form_tags %}
+{% block content %}
+<div class="glb">
+<h2 class="large-txt">{% blocktrans %}Import Variables}{% endblocktrans %}</h2>
+<hr class="mt-0 mb-4">
+<div class="glb-h">
+<div class="glb-h-e">
+{% if confirm_form %}
+  <form class="medium-txt col-md-6" action="{% url "import_variables_processing" %}" method="POST">
+    {{% confirm_form|crispy %}}
+    <p class="medium-txt">{% trans "Below is a preview of variables data to be imported. If you are satisfied with the results, click 'Confirm'" %}</p>
+    <div class="submit-row">
+      <input type="submit" class="btn btn-success" name="confirm" value="{% trans "Confirm" %}">
+    </div>
+  </form>
+
+{% else %}
+  <form class="medium-txt col-md-6" action="" method="post" enctype="multipart/form-data">
+    <p class="medium-txt">{% trans "This importer will import the following fields: " %}<code>{{ fields|join:", " }}</code></p>
+    <fieldset class="module aligned medium-txt">
+      {% for field in form %}
+        <div class="form-row">
+          {{ field.errors }}
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.field.help_text %}
+          <p class="help">{{ field.field.help_text|safe }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </fieldset>
+    <input type="submit" class="btn btn-success" value="{% trans "Submit" %}">
+  </form>
+{% endif %}
+
+{% if result %}
+  {% if result.has_errors %}
+    <h2 class="large-txt">{% trans "Errors" %}</h2>
+    <ul class="medium-txt">
+      {% for error in result.base_errors  %}
+      <li>
+        {{ error.error }}
+        <div class="traceback">{{ error.traceback|linebreaks }}</div>
+      </li>
+      {% endfor %}
+      {% for line, errors in result.row_errors %}
+        {% for error in errors %}
+          <li>
+            {% trans "Line number" %}: {{ line }} - {{ error.error }}
+            <div><code>{{ error.row.values|join:", " }}</code></div>
+            <div class="traceback">{{ error.traceback|linebreaks }}</div>
+          </li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+  {% else %}
+
+  <h2 class="large-txt">{% trans "Preview" %}</h2>
+  <table class="medium-txt">
+    <thead>
+      <tr>
+        <th></th>
+        {% for field in result.diff_headers %}
+          <th>{{ field }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    {% for row in result.rows %}
+    <tr>
+      <td>
+        {% if row.import_type == 'new' %}
+          {% trans "New" %}
+        {% elif row.import_type == 'skip' %}
+          {% trans "Skipped" %}
+        {% elif row.import_type == 'delete' %}
+          {% trans "Delete" %}
+        {% elif row.import_type == 'update' %}
+          {% trans "Update" %}
+        {% endif %}
+      </td>
+      {% for field in row.diff %}
+      <td>
+        {{ field }}
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+  {% endif %}
+</div>
+</div>
+</div>
+{% endblock  %}
+
+
+
+
+
+

@@ -104,8 +104,11 @@ class Variable(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        unique_together=('batch','name','timestamp')
+
     def __str__(self):
-        return " : ".join([str(self.id), self.batch.process.name, self.batch.name, self.name, str(self.value), self.date.replace(microsecond=0).isoformat(), self.modified.replace(microsecond=0).isoformat(' ')])
+        return " : ".join([str(self.id), self.batch.process.name, self.batch.name, self.name, str(self.value), self.timestamp.replace(microsecond=0).isoformat(), self.modified.replace(microsecond=0).isoformat(' ')])
 
 class Event(models.Model):
     batch = models.ForeignKey('Batch',on_delete=models.CASCADE)
@@ -113,9 +116,12 @@ class Event(models.Model):
     timestamp = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together=('batch','name','timestamp')
 
     def __str__(self):
-        return " : ".join([str(self.id), self.batch.process.name, self.batch.name, self.name, self.date.replace(microsecond=0).isoformat(), self.modified.replace(microsecond=0).isoformat(' ')])
+        return " : ".join([str(self.id), self.batch.process.name, self.batch.name, self.name, self.timestamp.replace(microsecond=0).isoformat(), self.modified.replace(microsecond=0).isoformat(' ')])
    
 class Class(models.Model):
     batch = models.ForeignKey('Batch',on_delete=models.CASCADE)
@@ -124,11 +130,11 @@ class Class(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-
     class Meta:
+        unique_together=('batch','name')
         verbose_name_plural = "Classes"
 
        
     def __str__(self):
-        return " : ".join([str(self.id), self.batch.process.name, self.batch.name, self.name, srt(self.value),self.date.replace(microsecond=0).isoformat(), self.modified.replace(microsecond=0).isoformat(' ')])
+        return " : ".join([str(self.id), self.batch.process.name, self.batch.name, self.name, srt(self.value),self.timestamp.replace(microsecond=0).isoformat(), self.modified.replace(microsecond=0).isoformat(' ')])
 
