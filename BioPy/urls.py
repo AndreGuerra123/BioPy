@@ -55,12 +55,12 @@ urlpatterns = [
     ### Remote Databases
 
     ### Import Files
-    path('actions/acquisition/import/',views.ImportView.as_view()),
+    path('actions/acquisition/import/',views.ImportView.as_view(),name="import"),
     path('actions/acquisition/import/variables/', views.VariableFileImport.as_view(),name="import_variables"),
     path('actions/acquisition/import/variables/processing/', views.VariableFileImportProcessing.as_view(),name="import_variables_processing"),
-    path('actions/acquisition/import/events/', views.EventFileImport.as_view(model=Event),name="import_events"),
+    path('actions/acquisition/import/events/', views.EventFileImport.as_view(),name="import_events"),
     path('actions/acquisition/import/events/processing/', views.EventFileImportProcessing.as_view(),name="import_events_processing"),
-    path('actions/acquisition/import/classes/', views.ClassFileImport.as_view(model=Class),name="import_classes"),
+    path('actions/acquisition/import/classes/', views.ClassFileImport.as_view(),name="import_classes"),
     path('actions/acquisition/import/classes/processing/', views.ClassFileImportProcessing.as_view(),name="import_classes_processing"),
 
 
@@ -73,19 +73,19 @@ urlpatterns = [
     # API
     ## Real-time
    
-    path('endpoints/',views.EndpointList.as_view()),
+    path('endpoints/',views.EndpointList.as_view(),name="endpoints_list"),
     path('endpoints/<pk>/', views.EndpointDetail.as_view()),
 
-    path('nodes/',views.NodeList.as_view()),
+    path('nodes/',views.NodeList.as_view(),name="nodes_list"),
     path('nodes/<pk>/', views.NodeDetail.as_view()),
 
     ## Historian
 
-    path('processes/', views.ProcessList.as_view()),
+    path('processes/', views.ProcessList.as_view(),name="processes_list"),
 
     path('processes/<pk>/', views.ProcessDetail.as_view()),
 
-    path('batches/', views.BatchList.as_view()),
+    path('batches/', views.BatchList.as_view(),name="batches_list"),
 
     path('batches/<pk>/', views.BatchDetail.as_view()),
 
@@ -93,11 +93,11 @@ urlpatterns = [
 
     path('variables/<pk>/', views.VariableDetail.as_view()),
 
-    path('events/', views.EventList.as_view()),
+    path('events/', views.EventList.as_view(),name="events_list"),
 
     path('events/<pk>/', views.EventDetail.as_view()),
 
-    path('classes/', views.ClassList.as_view()),
+    path('classes/', views.ClassList.as_view(),name="classes_list"),
 
     path('classes/<pk>/', views.ClassDetail.as_view()),
 ]

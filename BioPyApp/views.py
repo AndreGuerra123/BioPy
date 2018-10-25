@@ -13,9 +13,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
+from django.utils.translation import gettext as _
 from django.views import generic
 from import_export.formats import base_formats
 from import_export.forms import ConfirmImportForm, ImportForm
@@ -59,7 +60,8 @@ class AcquisitionView(generic.TemplateView):
 @method_decorator(login_required,name='dispatch')
 class ImportView(generic.TemplateView):
     template_name = 'actions/acquisition/import/import.html'
-#### FileImport   
+
+#### VariableFileImport   
 @method_decorator(login_required,name='dispatch')
 class VariableFileImport(generic.View):
     from_encoding = "utf-8"
@@ -72,8 +74,7 @@ class VariableFileImport(generic.View):
         base_formats.YAML,
         base_formats.HTML,
     )
-    import_template_name = 'actions/acquisition/import/variable_file_import.html'
-    resource = VariableResource()
+    template_name = 'actions/acquisition/import/variable_file_import.html'
 
     def get_import_formats(self):
         """
@@ -88,8 +89,8 @@ class VariableFileImport(generic.View):
         uploaded file to a local temp file that will be used by
         'process_import' for the actual import.
         '''
+        resource = VariableResource(self.request.user)
         context = {}
-
         import_formats = self.get_import_formats()
         form = ImportForm(import_formats,
                           self.request.POST or None,
@@ -114,7 +115,7 @@ class VariableFileImport(generic.View):
                 if not input_format.is_binary() and self.from_encoding:
                     data = force_text(data, self.from_encoding)
                 dataset = input_format.create_dataset(data)
-                result = self.resource.import_data(dataset, dry_run=True,
+                result = resource.import_data(dataset, dry_run=True,
                                               raise_errors=False)
 
             context['result'] = result
@@ -126,9 +127,9 @@ class VariableFileImport(generic.View):
                 })
 
         context['form'] = form
-        context['fields'] = [f.column_name for f in self.resource.get_fields()]
+        context['fields'] = [f.column_name for f in resource.get_fields()]
 
-        return TemplateResponse(self.request, [self.import_template_name], context)
+        return TemplateResponse(self.request, [self.template_name], context)
 
     def post(self, *args, **kwargs ):
         '''
@@ -137,6 +138,7 @@ class VariableFileImport(generic.View):
         uploaded file to a local temp file that will be used by
         'process_import' for the actual import.
         '''
+        resource = VariableResource(self.request.user)
         context = {}
         import_formats = self.get_import_formats()
         form = ImportForm(import_formats,
@@ -162,7 +164,7 @@ class VariableFileImport(generic.View):
                 if not input_format.is_binary() and self.from_encoding:
                     data = force_text(data, self.from_encoding)
                 dataset = input_format.create_dataset(data)
-                result = self.resource.import_data(dataset, dry_run=True,
+                result = resource.import_data(dataset, dry_run=True,
                                               raise_errors=False)
 
             context['result'] = result
@@ -174,9 +176,9 @@ class VariableFileImport(generic.View):
                 })
 
         context['form'] = form
-        context['fields'] = [f.column_name for f in self.resource.get_fields()]
+        context['fields'] = [f.column_name for f in resource.get_fields()]
 
-        return TemplateResponse(self.request, [self.import_template_name], context)
+        return TemplateResponse(self.request, [self.template_name], context)
 
 #### VariableFileProcessingImport
 @method_decorator(login_required,name='dispatch')
@@ -191,8 +193,7 @@ class VariableFileImportProcessing(generic.View):
         base_formats.YAML,
         base_formats.HTML,
     )
-    import_template_name = 'actions/acquisition/import/variable_file_import.html'
-    resource = VariableResource()
+    template_name = 'actions/acquisition/import/variable_file_import.html'
 
     def get_import_formats(self):
         """
@@ -203,9 +204,9 @@ class VariableFileImportProcessing(generic.View):
     def post(self, *args, **kwargs ):
         '''
         Perform the actual import action (after the user has confirmed he
-    wishes to import)
+        wishes to import)
         '''
-
+        resource = VariableResource(self.request.user)
         confirm_form = ConfirmImportForm(self.request.POST)
         if confirm_form.is_valid():
             import_formats = self.get_import_formats()
@@ -222,18 +223,354 @@ class VariableFileImportProcessing(generic.View):
                 data = force_text(data, self.from_encoding)
             dataset = input_format.create_dataset(data)
 
-            self.resource.import_data(dataset, dry_run=False, raise_errors=True)
+            resource.import_data(dataset, dry_run=False, raise_errors=True)
+
+            success_message = _('Import sucessfull')
+            messages.success(self.request, success_message)
+            import_file.close()           
+            return HttpResponseRedirect(reverse_lazy('variables_list'))
+
+#### EventFileImport   
+@method_decorator(login_required,name='dispatch')
+class EventFileImport(generic.TemplateView):
+    from_encoding = "utf-8"
+    formats = (
+        base_formats.CSV,
+        base_formats.XLS,
+        base_formats.TSV,
+        base_formats.ODS,
+        base_formats.JSON,
+        base_formats.YAML,
+        base_formats.HTML,
+    )
+    template_name = 'actions/acquisition/import/event_file_import.html'
+
+    def get_import_formats(self):
+        """
+        Returns available import formats.
+        """
+        return [f for f in self.formats if f().can_import()]
+
+    def get(self, *args, **kwargs ):
+        '''
+        Perform a dry_run of the import to make sure the import will not
+        result in errors.  If there where no error, save the user
+        uploaded file to a local temp file that will be used by
+        'process_import' for the actual import.
+        '''
+        resource = EventResource(self.request.user)
+        context = self.get_context_data()
+        import_formats = self.get_import_formats()
+        form = ImportForm(import_formats,
+                          self.request.POST or None,
+                          self.request.FILES or None)
+
+        if self.request.POST and form.is_valid():
+            input_format = import_formats[
+                int(form.cleaned_data['input_format'])
+            ]()
+            import_file = form.cleaned_data['import_file']
+            # first always write the uploaded file to disk as it may be a
+            # memory file or else based on settings upload handlers
+            with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
+                for chunk in import_file.chunks():
+                    uploaded_file.write(chunk)
+
+            # then read the file, using the proper format-specific mode
+            with open(uploaded_file.name,
+                      input_format.get_read_mode()) as uploaded_import_file:
+                # warning, big files may exceed memory
+                data = uploaded_import_file.read()
+                if not input_format.is_binary() and self.from_encoding:
+                    data = force_text(data, self.from_encoding)
+                dataset = input_format.create_dataset(data)
+                result = resource.import_data(dataset, dry_run=True,
+                                              raise_errors=False)
+
+            context['result'] = result
+
+            if not result.has_errors():
+                context['confirm_form'] = ConfirmImportForm(initial={
+                    'import_file_name': os.path.basename(uploaded_file.name),
+                    'input_format': form.cleaned_data['input_format'],
+                })
+
+        context['form'] = form
+        context['fields'] = [f.column_name for f in resource.get_fields()]
+
+        return TemplateResponse(self.request, [self.template_name], context)
+
+    def post(self, *args, **kwargs ):
+        '''
+        Perform a dry_run of the import to make sure the import will not
+        result in errors.  If there where no error, save the user
+        uploaded file to a local temp file that will be used by
+        'process_import' for the actual import.
+        '''
+        resource = EventResource(self.request.user)
+        context = self.get_context_data()
+        import_formats = self.get_import_formats()
+        form = ImportForm(import_formats,
+                          self.request.POST or None,
+                          self.request.FILES or None)
+
+        if self.request.POST and form.is_valid():
+            input_format = import_formats[
+                int(form.cleaned_data['input_format'])
+            ]()
+            import_file = form.cleaned_data['import_file']
+            # first always write the uploaded file to disk as it may be a
+            # memory file or else based on settings upload handlers
+            with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
+                for chunk in import_file.chunks():
+                    uploaded_file.write(chunk)
+
+            # then read the file, using the proper format-specific mode
+            with open(uploaded_file.name,
+                      input_format.get_read_mode()) as uploaded_import_file:
+                # warning, big files may exceed memory
+                data = uploaded_import_file.read()
+                if not input_format.is_binary() and self.from_encoding:
+                    data = force_text(data, self.from_encoding)
+                dataset = input_format.create_dataset(data)
+                result = resource.import_data(dataset, dry_run=True,
+                                              raise_errors=False)
+
+            context['result'] = result
+
+            if not result.has_errors():
+                context['confirm_form'] = ConfirmImportForm(initial={
+                    'import_file_name': os.path.basename(uploaded_file.name),
+                    'input_format': form.cleaned_data['input_format'],
+                })
+
+        context['form'] = form
+        context['fields'] = [f.column_name for f in resource.get_fields()]
+
+        return TemplateResponse(self.request, [self.template_name], context)
+
+#### EventFileProcessingImport
+@method_decorator(login_required,name='dispatch')
+class EventFileImportProcessing(generic.View):
+    from_encoding = "utf-8"
+    formats = (
+        base_formats.CSV,
+        base_formats.XLS,
+        base_formats.TSV,
+        base_formats.ODS,
+        base_formats.JSON,
+        base_formats.YAML,
+        base_formats.HTML,
+    )
+    import_template_name = 'actions/acquisition/import/event_file_import.html'
+
+    def get_import_formats(self):
+        """
+        Returns available import formats.
+        """
+        return [f for f in self.formats if f().can_import()]
+
+    def post(self, *args, **kwargs ):
+        '''
+        Perform the actual import action (after the user has confirmed he
+    wishes to import)
+        '''
+        resource = EventResource(self.request.user)
+        confirm_form = ConfirmImportForm(self.request.POST)
+        if confirm_form.is_valid():
+            import_formats = self.get_import_formats()
+            input_format = import_formats[
+                int(confirm_form.cleaned_data['input_format'])
+            ]()
+            import_file_name = os.path.join(
+                tempfile.gettempdir(),
+                confirm_form.cleaned_data['import_file_name']
+            )
+            import_file = open(import_file_name, input_format.get_read_mode())
+            data = import_file.read()
+            if not input_format.is_binary() and self.from_encoding:
+                data = force_text(data, self.from_encoding)
+            dataset = input_format.create_dataset(data)
+
+            resource.import_data(dataset, dry_run=False, raise_errors=True)
 
             success_message = _('Import sucessfull')
             messages.success(self.request, success_message)
             import_file.close()
-            return reverse('variable_list')
+            return HttpResponseRedirect(reverse('events_list'))
 
-#TODO: COPY ABOVE FOR EVENTS AND CLASSES 
+#### ClassFileImport   
+@method_decorator(login_required,name='dispatch')
+class ClassFileImport(generic.View):
+    from_encoding = "utf-8"
+    formats = (
+        base_formats.CSV,
+        base_formats.XLS,
+        base_formats.TSV,
+        base_formats.ODS,
+        base_formats.JSON,
+        base_formats.YAML,
+        base_formats.HTML,
+    )
+    template_name = 'actions/acquisition/import/class_file_import.html'
+
+    def get_import_formats(self):
+        """
+        Returns available import formats.
+        """
+        return [f for f in self.formats if f().can_import()]
+
+    def get(self, *args, **kwargs ):
+        '''
+        Perform a dry_run of the import to make sure the import will not
+        result in errors.  If there where no error, save the user
+        uploaded file to a local temp file that will be used by
+        'process_import' for the actual import.
+        '''
+        resource = ClassResource(self.request.user)
+        context = {}
+
+        import_formats = self.get_import_formats()
+        form = ImportForm(import_formats,
+                          self.request.POST or None,
+                          self.request.FILES or None)
+
+        if self.request.POST and form.is_valid():
+            input_format = import_formats[
+                int(form.cleaned_data['input_format'])
+            ]()
+            import_file = form.cleaned_data['import_file']
+            # first always write the uploaded file to disk as it may be a
+            # memory file or else based on settings upload handlers
+            with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
+                for chunk in import_file.chunks():
+                    uploaded_file.write(chunk)
+
+            # then read the file, using the proper format-specific mode
+            with open(uploaded_file.name,
+                      input_format.get_read_mode()) as uploaded_import_file:
+                # warning, big files may exceed memory
+                data = uploaded_import_file.read()
+                if not input_format.is_binary() and self.from_encoding:
+                    data = force_text(data, self.from_encoding)
+                dataset = input_format.create_dataset(data)
+                result = resource.import_data(dataset, dry_run=True,
+                                              raise_errors=False)
+
+            context['result'] = result
+
+            if not result.has_errors():
+                context['confirm_form'] = ConfirmImportForm(initial={
+                    'import_file_name': os.path.basename(uploaded_file.name),
+                    'input_format': form.cleaned_data['input_format'],
+                })
+
+        context['form'] = form
+        context['fields'] = [f.column_name for f in resource.get_fields()]
+
+        return TemplateResponse(self.request, [self.template_name], context)
+
+    def post(self, *args, **kwargs ):
+        '''
+        Perform a dry_run of the import to make sure the import will not
+        result in errors.  If there where no error, save the user
+        uploaded file to a local temp file that will be used by
+        'process_import' for the actual import.
+        '''
+        resource = ClassResource(self.request.user)
+        context = {}
+        import_formats = self.get_import_formats()
+        form = ImportForm(import_formats,
+                          self.request.POST or None,
+                          self.request.FILES or None)
+
+        if self.request.POST and form.is_valid():
+            input_format = import_formats[
+                int(form.cleaned_data['input_format'])
+            ]()
+            import_file = form.cleaned_data['import_file']
+            # first always write the uploaded file to disk as it may be a
+            # memory file or else based on settings upload handlers
+            with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
+                for chunk in import_file.chunks():
+                    uploaded_file.write(chunk)
+
+            # then read the file, using the proper format-specific mode
+            with open(uploaded_file.name,
+                      input_format.get_read_mode()) as uploaded_import_file:
+                # warning, big files may exceed memory
+                data = uploaded_import_file.read()
+                if not input_format.is_binary() and self.from_encoding:
+                    data = force_text(data, self.from_encoding)
+                dataset = input_format.create_dataset(data)
+                result = resource.import_data(dataset, dry_run=True,
+                                              raise_errors=False)
+
+            context['result'] = result
+
+            if not result.has_errors():
+                context['confirm_form'] = ConfirmImportForm(initial={
+                    'import_file_name': os.path.basename(uploaded_file.name),
+                    'input_format': form.cleaned_data['input_format'],
+                })
+
+        context['form'] = form
+        context['fields'] = [f.column_name for f in resource.get_fields()]
+
+        return TemplateResponse(self.request, [self.template_name], context)
+
+#### ClassFileProcessingImport
+@method_decorator(login_required,name='dispatch')
+class ClassFileImportProcessing(generic.View):
+    from_encoding = "utf-8"
+    formats = (
+        base_formats.CSV,
+        base_formats.XLS,
+        base_formats.TSV,
+        base_formats.ODS,
+        base_formats.JSON,
+        base_formats.YAML,
+        base_formats.HTML,
+    )
+    template_name = 'actions/acquisition/import/class_file_import.html'
+
+    def get_import_formats(self):
+        """
+        Returns available import formats.
+        """
+        return [f for f in self.formats if f().can_import()]
+
+    def post(self, *args, **kwargs ):
+        '''
+        Perform the actual import action (after the user has confirmed he
+        wishes to import)
+        '''
+        resource = ClassResource(self.request.user)
+        confirm_form = ConfirmImportForm(self.request.POST)
+        if confirm_form.is_valid():
+            import_formats = self.get_import_formats()
+            input_format = import_formats[
+                int(confirm_form.cleaned_data['input_format'])
+            ]()
+            import_file_name = os.path.join(
+                tempfile.gettempdir(),
+                confirm_form.cleaned_data['import_file_name']
+            )
+            import_file = open(import_file_name, input_format.get_read_mode())
+            data = import_file.read()
+            if not input_format.is_binary() and self.from_encoding:
+                data = force_text(data, self.from_encoding)
+            dataset = input_format.create_dataset(data)
+
+            resource.import_data(dataset, dry_run=False, raise_errors=True)
+
+            success_message = _('Import sucessfull')
+            messages.success(self.request, success_message)
+            import_file.close()
+            return HttpResponseRedirect(reverse('classes_list'))
 
 # API views
-
-#Real-time
+## Real-time
 @method_decorator(login_required,name='dispatch')
 class EndpointList(generics.ListCreateAPIView):
     """

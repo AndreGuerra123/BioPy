@@ -136,5 +136,5 @@ class Class(models.Model):
 
        
     def __str__(self):
-        return " : ".join([str(self.id), self.batch.process.name, self.batch.name, self.name, srt(self.value),self.timestamp.replace(microsecond=0).isoformat(), self.modified.replace(microsecond=0).isoformat(' ')])
+        return " : ".join([str(self.id), self.batch.process.name, self.batch.name, self.name, self.value, self.modified.replace(microsecond=0).isoformat(' ')])
 

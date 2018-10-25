@@ -70,6 +70,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # DB
 
+IMPORT_EXPORT_USE_TRANSACTIONS=False
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',

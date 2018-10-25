@@ -1,60 +1,149 @@
 from os import name
 
 from import_export import fields, resources
-from import_export.widgets import ForeignKeyWidget, DateTimeWidget
+from import_export.widgets import ForeignKeyWidget,CharWidget
 
-from BioPyApp import models
+from BioPyApp.models import Variable,Event,Class,Process,Batch
 from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
+
+class ProcessBatchForeignKeyWidget(ForeignKeyWidget):
+    def get_queryset(self, value, row):
+        return self.model.objects.filter(
+            process__name=row["process"]
+        )
+
+class ProcessBatchResource(resources.ModelResource):
+    process = fields.Field(column_name='process',widget=CharWidget())
+    batch = fields.Field(attribute="batch",column_name='batch',widget=ProcessBatchForeignKeyWidget(Batch, 'name'))  
+
+    def dehydrate_process(self,Instance):
+        return getattr(Instance.batch.process,'name',None)
+        
+    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+        for row in dataset.dict:
+            process_ins=Process.objects.filter(name=row['process'],owner=self.user).first()
+            if not process_ins:
+                raise ValidationError('Could not find process \'%s\' for user \'%s\' defined in row %s.' % (process_ins,self.user,row))
+            batch_ins=Batch.objects.filter(name=row['batch'],process=process_ins).first()
+            if not batch_ins:
+                raise ValidationError('Could not find batch \'%s\' related to process \'%s\' for user \'%s\' for row %s' % (batch_ins,process_ins,self.user,row))
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
 
 
-
-class VariableResource(resources.ModelResource):    
-    process = fields.Field(attribute="batch__process",column_name='process',widget=ForeignKeyWidget(models.Process,'name'))
-    batch = fields.Field(attribute="batch",column_name='batch',widget=ForeignKeyWidget(models.Batch, 'name'))  
-
-    class Meta:
-        model = models.Variable
-        fields = ('timestamp','batch','name','value')
+class VariableResource(ProcessBatchResource):    
+    class Meta:        
+        model = Variable
         skip_unchanged = True
         report_skipped = True
-        import_id_fields = ('timestamp','batch','name','value')
+        exclude = ('id','created','modified')
+        import_id_fields = ('batch','name','timestamp') 
         export_order = ('timestamp','process','batch','name','value')
 
-    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
-        user = kwargs['user']
-        if not user.is_superuser:
-            for row in dataset.dict:
-                process=models.Process.objects.filter(name=row['process'],owner=user).first()
-                if not process:
-                    raise ValidationError('Could not find process \'%s\' for user \'%s\' defined in row %s.' % (process,user,row))
-                else:
-                    batch=models.Batch.objects.filter(name=row['batch'],process=process).first()
-                    if not batch:
-                        raise ValidationError('Could not find batch \'%s\' related to process \'%s\' for user \'%s\' for row %s' % (batch,process,user,row))
-       
     def get_queryset(self):
-        queryset = super(VariableResource, self).get_queryset()
-        user = self.request.user
-        if not user.is_superuser:
-            queryset = self._meta.model.objects.filter(batch__process__owner=user)
-        return queryset
+        if not self.user.is_superuser:
+            return Variable.objects.filter(batch__process__owner=self.user)
+        else:
+            return Variable.objects.all()
+
+
+class EventResource(ProcessBatchResource):
+
+    class Meta:
+        model = Event
+        skip_unchanged = True
+        report_skipped = True
+        exclude = ('id','created','modified')
+        import_id_fields = ('batch','name','timestamp') 
+        export_order = ('timestamp','process','batch','name')
+
+    def get_queryset(self):
+        if not self.user.is_superuser:
+            return Event.objects.filter(batch__process__owner=self.user)
+        else:
+            return Event.objects.all()
+     
+
+class ClassResource(ProcessBatchResource):
+
+    class Meta:
+        model = Class
+        skip_unchanged = True
+        report_skipped = True
+        exclude = ('id','created','modified')
+        import_id_fields = ('batch','name','value')
+        export_order = ('process','batch','name','value')
+
+    def get_queryset(self):
+        if not self.user.is_superuser:
+            return Class.objects.filter(batch__process__owner=self.user)
+        else:
+            return Class.objects.all()
+
+
+class ProcessBatchAdminForeignKeyWidget(ForeignKeyWidget):
+    def get_queryset(self, value, row):
+        return self.model.objects.filter(
+            process__owner__username=row["user"],
+            process__name=row["process"]
+        )
+
+class ProcessBatchAdminResource(resources.ModelResource):
+    user = fields.Field(column_name='user',widget=CharWidget())
+    process = fields.Field(column_name='process',widget=CharWidget())
+    batch = fields.Field(attribute="batch",column_name='batch',widget=ProcessBatchAdminForeignKeyWidget(Batch, 'name'))  
+
+    def dehydrate_process(self,Instance):
+        return getattr(Instance.batch.process,'name',None)
         
+    def dehydrate_user(self,Instance):
+        return getattr(Instance.batch.process.owner,'username',None)
 
- 
-class EventResource(resources.ModelResource):
-    timestamp = fields.Field(attribute='timestamp',column_name='timestamp')
-    batch = fields.Field(attribute='batch',column_name='batch',widget=ForeignKeyWidget(models.Batch, 'name'))   
-    name = fields.Field(attribute='name',column_name='name')
-    value = fields.Field(attribute='value',column_name='value')
+    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+        for row in dataset.dict:
+            user_ins=get_user_model().objects.filter(username=row["user"]).first()
+            if not user_ins:
+                raise ValidationError('Could not find for user \'%s\' defined in row %s.' % (user_ins,row))
+            process_ins=Process.objects.filter(name=row['process'],owner=user_ins).first()
+            if not process_ins:
+                raise ValidationError('Could not find process \'%s\' for user \'%s\' defined in row %s.' % (process_ins,user_ins,row))
+            batch_ins=Batch.objects.filter(name=row['batch'],process=process_ins).first()
+            if not batch_ins:
+                raise ValidationError('Could not find batch \'%s\' related to process \'%s\' for user \'%s\' for row %s' % (batch_ins,process_ins,user_ins,row))
 
+
+class VariableAdminResource(ProcessBatchAdminResource):
+    
+    class Meta:        
+        model = Variable
+        skip_unchanged = True
+        report_skipped = True
+        exclude = ('id','created','modified')
+        import_id_fields = ('batch','name','timestamp') 
+        export_order = ('timestamp','user','process','batch','name','value')
+
+class EventAdminResource(ProcessBatchAdminResource):    
+    
     class Meta:
-        fields = ('timestamp','batch','name','value')
+        model = Event
+        skip_unchanged = True
+        report_skipped = True
+        exclude = ('id','created','modified')
+        import_id_fields = ('batch','name','timestamp') 
+        export_order = ('timestamp','user','process','batch','name')
 
-
-class ClassResource(resources.ModelResource):
-    batch = fields.Field(attribute='batch',column_name='batch',widget=ForeignKeyWidget(models.Batch, 'name'))   
-    name = fields.Field(attribute='name',column_name='name')
-    value = fields.Field(attribute='value',column_name='value')
-
+    
+class ClassAdminResource(ProcessBatchAdminResource):    
+     
     class Meta:
-        fields = ('batch','name','value')
+        model = Class
+        skip_unchanged = True
+        report_skipped = True
+        exclude = ('id','created','modified')
+        import_id_fields = ('batch','name','value')
+        export_order = ('user','process','batch','name','value')
+
+    

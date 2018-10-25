@@ -5,17 +5,18 @@ from BioPyApp import models
 from BioPyApp import resources
 
 class VariableAdmin(ImportExportModelAdmin):
-    
     def get_resource_class(self):
-        return resources.VariableResource
+        return resources.VariableAdminResource
 
 class EventAdmin(ImportExportModelAdmin):
-    resource = resources.EventResource
+    def get_resource_class(self):
+        return resources.EventAdminResource
 
 class ClassAdmin(ImportExportModelAdmin):
-    resource = resources.ClassResource
+   def get_resource_class(self):
+        return resources.ClassAdminResource
 
-admin.site.register(models.Variable, VariableAdmin)
+admin.site.register(models.Variable,VariableAdmin)
 admin.site.register(models.Event,EventAdmin)
 admin.site.register(models.Class, ClassAdmin)
 admin.site.register(models.Endpoint)

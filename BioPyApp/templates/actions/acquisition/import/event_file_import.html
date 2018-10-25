@@ -1,42 +1,39 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load admin_urls %}
-{% load import_export_tags %}
-{% load crispy_form_tags %}
 {% block content %}
 <div class="glb">
-<h2 class="large-txt">{% blocktrans %}Import Variables}{% endblocktrans %}</h2>
+<h2 class="large-txt">{% blocktrans %}Import Events{% endblocktrans %}</h2>
 <hr class="mt-0 mb-4">
 <div class="glb-h">
 <div class="glb-h-e">
 {% if confirm_form %}
-  <form class="medium-txt col-md-6" action="{% url "import_variables_processing" %}" method="POST">
-    {{% confirm_form|crispy %}}
-    <p class="medium-txt">{% trans "Below is a preview of variables data to be imported. If you are satisfied with the results, click 'Confirm'" %}</p>
+  <form class="medium-txt col-md-6" action="{% url "import_events_processing" %}" method="POST">
+    {% csrf_token %}
+    {{ confirm_form }}
+    <p class="medium-txt">{% trans "Below is a preview of events data to be imported. If you are satisfied with the results, click 'Confirm'" %}</p>
     <div class="submit-row">
       <input type="submit" class="btn btn-success" name="confirm" value="{% trans "Confirm" %}">
     </div>
   </form>
-
-{% else %}
+{% else %}    
+  <p class="medium-txt">{% trans "This importer will import the following events model fields: " %}<code>{{ fields|join:", " }}</code></p>
   <form class="medium-txt col-md-6" action="" method="post" enctype="multipart/form-data">
-    <p class="medium-txt">{% trans "This importer will import the following fields: " %}<code>{{ fields|join:", " }}</code></p>
+    {% csrf_token %}
     <fieldset class="module aligned medium-txt">
       {% for field in form %}
-        <div class="form-row">
-          {{ field.errors }}
-          {{ field.label_tag }}
-          {{ field }}
+        <div class="glb-h-e">
+          <p class="medium-txt">{{ field.label_tag }}</p>
+          <p>{{ field }}</p>
+          <p class="medium-txt">{{ field.errors }}</p>
           {% if field.field.help_text %}
           <p class="help">{{ field.field.help_text|safe }}</p>
           {% endif %}
         </div>
       {% endfor %}
     </fieldset>
-    <input type="submit" class="btn btn-success" value="{% trans "Submit" %}">
+    <p><input type="submit" class="btn btn-success" value="{% trans "Submit" %}"></p>
   </form>
 {% endif %}
-
 {% if result %}
   {% if result.has_errors %}
     <h2 class="large-txt">{% trans "Errors" %}</h2>

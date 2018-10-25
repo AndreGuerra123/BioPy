@@ -1,29 +1,21 @@
 {% load static %}
 {% load i18n %}
-{% load crispy_forms_tags %}
 <html>
 
     <!-- Bootstrap CSS CDN -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    
-    <link rel="stylesheet" href="{% static 'css/rest_framework/default.css' %}">
-    {% comment %} <link rel="stylesheet" href="{% static 'css/rest_framework/prettify.css' %}"> {% endcomment %}
-    
-    <!-- BioPy CSS -->
-    <link rel="stylesheet" href="{% static 'css/global.css' %}">
-
+       
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
     
     <!-- Zocial -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/css-social-buttons/1.3.0/css/zocial.min.css">
 
-
-    <script src="{% static "js/rest_framework/csrf.js" %}"></script>
-    <script src="{% static "js/rest_framework/ajax-form.js" %}"></script>
-    <script src="{% static "js/rest_framework/prettify-min.js" %}"></script>
-    <script src="{% static "js/rest_framework/default.js" %}"></script>
+    <!-- BioPy CSS -->
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
     
+    <script src="{% static "js/rest_framework/csrf.js" %}"></script>
+    <script src="{% static "js/rest_framework/ajax-form.js" %}"></script>  
 
 <head>
     <meta charset="utf-8">
