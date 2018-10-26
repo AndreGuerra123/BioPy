@@ -1,11 +1,14 @@
 from os import name
 
-from import_export import fields, resources
-from import_export.widgets import ForeignKeyWidget,CharWidget
-
-from BioPyApp.models import Variable,Event,Class,Process,Batch
-from django.core.exceptions import ValidationError
+from .common import rgetattr
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from import_export import fields, resources
+from import_export.widgets import CharWidget, ForeignKeyWidget
+
+from BioPyApp.common import rgetattr
+from BioPyApp.models import Batch, Class, Event, Process, Variable
+
 
 class ProcessBatchForeignKeyWidget(ForeignKeyWidget):
     def get_queryset(self, value, row):
@@ -18,7 +21,7 @@ class ProcessBatchResource(resources.ModelResource):
     batch = fields.Field(attribute="batch",column_name='batch',widget=ProcessBatchForeignKeyWidget(Batch, 'name'))  
 
     def dehydrate_process(self,Instance):
-        return getattr(Instance.batch.process,'name',None)
+        return rgetattr(Instance,'batch.process.name')
         
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
         for row in dataset.dict:
@@ -97,10 +100,10 @@ class ProcessBatchAdminResource(resources.ModelResource):
     batch = fields.Field(attribute="batch",column_name='batch',widget=ProcessBatchAdminForeignKeyWidget(Batch, 'name'))  
 
     def dehydrate_process(self,Instance):
-        return getattr(Instance.batch.process,'name',None)
+        return rgetattr(Instance,'batch.process.name')
         
     def dehydrate_user(self,Instance):
-        return getattr(Instance.batch.process.owner,'username',None)
+        return rgetattr(Instance,'batch.process.owner.username')
 
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
         for row in dataset.dict:
