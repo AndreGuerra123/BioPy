@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="glb">
+<h2 class="large-txt">{% blocktrans %}Input Historian Confirmation{% endblocktrans %}</h2>
+<hr class="mt-0 mb-4">
+<div class="glb-v">
+<div class="glb-v-e">
+{% for result in results %}
+<h1 class="large-txt">{{ result.name }}</h1>
+{% if result.has_errors %}
+    <h2 class="large-txt">{% trans "Errors" %}</h2>
+    <ul class="medium-txt">
+      {% for error in result.base_errors  %}
+      <li>
+        {{ error.error }}
+        <div class="traceback">{{ error.traceback|linebreaks }}</div>
+      </li>
+      {% endfor %}
+      {% for line, errors in result.row_errors %}
+        {% for error in errors %}
+          <li>
+            {% trans "Line number" %}: {{ line }} - {{ error.error }}
+            <div><code>{{ error.row.values|join:", " }}</code></div>
+            <div class="traceback">{{ error.traceback|linebreaks }}</div>
+          </li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+{% else %}
+  <h2 class="large-txt">{% trans "Preview" %}</h2>
+  <table class="table medium-txt">
+    <thead>
+      <tr>
+        <th></th>
+        {% for field in result.diff_headers %}
+          <th>{{ field }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    {% for row in result.rows %}
+    <tr>
+      <td>
+        {% if row.import_type == 'new' %}
+          {% trans "New" %}
+        {% elif row.import_type == 'skip' %}
+          {% trans "Skipped" %}
+        {% elif row.import_type == 'delete' %}
+          {% trans "Delete" %}
+        {% elif row.import_type == 'update' %}
+          {% trans "Update" %}
+        {% endif %}
+      </td>
+      {% for field in row.diff %}
+      <td>
+        {{ field }}
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+{% endif %}
+{% endfor %}
+{% if results.all_passed %}
+<form class="medium-txt col-md-6" action="{% url "historian_processor" %}" method="POST">
+    {% csrf_token %}
+    {{ confirm_form }}
+    <p class="medium-txt">{% trans "If you are satisfied with the results, click 'Confirm'" %}</p>
+    <div class="submit-row">
+      <input type="submit" class="btn btn-success" name="confirm" value="{% trans "Confirm" %}">
+    </div>
+<form>
+{% endif %}
+</div>
+</div>
+</div>
+{% endblock  %}
+
+
+
+
+
+

@@ -15,15 +15,25 @@
     <link rel="stylesheet" href="{% static 'css/global.css' %}">
     
     <script src="{% static "js/rest_framework/csrf.js" %}"></script>
-    <script src="{% static "js/rest_framework/ajax-form.js" %}"></script>  
+    
+    <script src="{% static "js/rest_framework/ajax-form.js" %}"></script>
+     
+     <!-- jQuery CDN - Slim version (=without AJAX) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <!-- Popper.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+    <!-- BioPy JS -->
+    <script src="{% static 'js/global.js'%}"></script>
+                 
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
     <title>BioPy</title>
-    
 </head>
 
 <body>
@@ -43,33 +53,38 @@
                 <a href="#actionsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Actions</a>
                 <ul class="collapse list-unstyled" id="actionsSubmenu">
                     <li>
-                       <a href="#acquisitionSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Data Acquisition</a>
-                        <ul class="collapse list-unstyled" id="acquisitionSubmenu">
+                       <a href="#inputSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Input</a>
+                        <ul class="collapse list-unstyled" id="inputSubmenu">
                             <li>
-                                <a href="/actions/acquisition/online/">Online OPCUA</a>
+                                <a href="/actions/input/realtime/">Real-time</a>
                             </li>
                             <li>
-                                <a href="/actions/acquisition/offline/">Offline OPCUA</a>
+                                <a href="/actions/input/historian/">Historian</a>
                             </li>
                             <li>
-                                <a href="/actions/acquisition/import/">Import</a>
+                                <a href="/actions/input/import/">Import Files</a>
                             </li>
                         </ul>
                     </li>
                     <li>
-                       <a href="#datasetSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Datasets</a>
-                        <ul class="collapse list-unstyled" id="datasetSubmenu">
+                       <a href="#outputSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Output</a>
+                        <ul class="collapse list-unstyled" id="outputSubmenu">
                         <li>
-                            <a href="/dataset/classes">Classes</a>
+                            <a href="/actions/output/dataset/">Dataset</a>
                         </li>
                         <li>
-                            <a href="/dataset/variables">Variables</a>
+                            <a href="/actions/output/export/">Export Files</a>
+                        </li>
+                        </ul>
+                    </li>
+                    <li>
+                       <a href="#viewSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">View</a>
+                        <ul class="collapse list-unstyled" id="viewSubmenu">
+                        <li>
+                            <a href="/actions/output/dataframe/">Dataframe</a>
                         </li>
                         <li>
-                            <a href="/dataset/events">Events</a>
-                        </li>
-                        <li>
-                            <a href="/dataset/spectrum">Spectrum</a>
+                            <a href="/dataset/variables">Export Files</a>
                         </li>
                         </ul>
                     </li>
@@ -227,17 +242,6 @@
           </div>
         </div>
     </div>
-
-    <!-- jQuery CDN - Slim version (=without AJAX) -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <!-- Popper.JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
-    <!-- BioPy JS -->
-    <script src="{% static 'js/global.js'%}"></script>
-                 
     
 </body>
 

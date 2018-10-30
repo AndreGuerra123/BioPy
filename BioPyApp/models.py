@@ -1,15 +1,23 @@
+from urllib.parse import urlparse
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.forms.models import InlineForeignKeyField
-from urllib.parse import urlparse
-from django.core.exceptions import ValidationError
+
 
 class Endpoint(models.Model):
-    POLICIES=[('POLICY1','policy'),('POLICY2','policy2')]
-    MODES=[('MODE1','Mode1')]
+    POLICIES=[('Basic128Rsa15','Basic128Rsa15'),
+              ('Basic256','Basic256'),
+              ('None','None'),
+              ('Basic256Sha256','Basic256Sha256')]
+    MODES=[('Sign','Sign'),
+           ('None_','None'),
+           ('SignAndEncrypt','SignAndEncrypt')]
+
     owner = models.ForeignKey(User,on_delete=models.CASCADE)
     url = models.CharField(max_length=200)
     policy = models.CharField(choices=POLICIES,max_length=50)
@@ -43,6 +51,9 @@ class Endpoint(models.Model):
         self.validate_unique()
         super(Endpoint, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return " : ".join([str(self.id), self.url, self.policy, self.mode, self.owner.username, self.modified.replace(microsecond=0).isoformat(' ')])
+
         
 
 class Node(models.Model):
@@ -54,6 +65,12 @@ class Node(models.Model):
     modified = models.DateTimeField(auto_now=True)
     class Meta:
         unique_together= ('endpoint','nodeid')
+
+    def __str__(self):
+        return " : ".join([str(self.id), self.nodeid,self.type,str(self.endpoint), self.modified.replace(microsecond=0).isoformat(' ')])
+
+        
+
 
 class Process(models.Model):
     PROCESS_TYPES=(

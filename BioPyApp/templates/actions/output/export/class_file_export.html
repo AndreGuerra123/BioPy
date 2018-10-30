@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="glb">
+<h2 class="large-txt">{% blocktrans %}Export Classifiers{% endblocktrans %}</h2>
+<hr class="mt-0 mb-4">
+<div class="glb-v">
+<div class="glb-v-e">
+  <form class="medium-txt col-md-6" action="" method="post">
+    {% csrf_token %}
+    <fieldset class="module aligned medium-txt">
+      {% for field in form %}
+        <div class="glb-h-e">
+          <p class="medium-txt">{{ field.label_tag }}</p>
+          <p>{{ field }}</p>
+          <p class="medium-txt">{{ field.errors }}</p>
+          {% if field.field.help_text %}
+          <p class="help">{{ field.field.help_text|safe }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </fieldset>
+    <p><input type="submit" class="btn btn-success" value="{% trans "Download" %}"></p>
+  </form>
+</div>
+</div>
+</div>
+{% endblock  %}
+
+
+
+
+
+

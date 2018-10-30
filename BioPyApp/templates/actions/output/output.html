@@ -5,7 +5,7 @@
 <div class="glb">	
 <div class="glb-v">
 <div class="glb-v-e">
-    <h1 class="large-txt">{% trans 'Actions' %}</h1>
+    <h1 class="large-txt">{% trans 'Output Data' %}</h1>
     <hr class="mt-0 mb-4">
 </div>
 <div class="glb-v-e">
@@ -13,33 +13,23 @@
   <ol class="carousel-indicators">
     <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
     <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-    <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
   </ol>
   <div class="carousel-inner">
     <div class="carousel-item active">
-      <a href="{% url 'input' %}">
-        <img class="d-block m-auto" src={% static 'images/input.png' %}>
+      <a href="{% url 'realtime' %}">
+        <img class="d-block m-auto" src={% static 'images/dataframe.png' %}>
         <div class="carousel-caption d-none d-md-block">
-        <h5 class="large-txt">{% trans 'Input Data' %}</h5>
-        <p class="medium-txt">{% trans 'Transfer your data into BioPy.' %}</p>
+        <h5 class="large-txt">{% trans 'Dataframe Data' %}</h5>
+        <p class="medium-txt">{% trans 'Output multidimensional dataframes from BioPy.' %}</p>
         </div>
       </a>
     </div>
     <div class="carousel-item">
-      <a href="{% url 'output' %}">
-        <img class="d-block m-auto" src={% static 'images/output.png' %}>
+      <a href="{% url 'historian' %}">
+        <img class="d-block m-auto" src={% static 'images/file.png' %}>
         <div class="carousel-caption d-none d-md-block">
-        <h5 class="large-txt">{% trans 'Output Data' %}</h5>
-        <p class="medium-txt">{% trans 'Create your datasets in BioPy.' %}</p>
-        </div>
-      </a>
-    </div>
-    <div class="carousel-item">
-      <a href="{% url 'import_classes' %}">
-        <img class="d-block m-auto" src={% static 'images/view.png' %}>
-        <div class="carousel-caption d-none d-md-block">
-        <h5 class="large-txt">{% trans 'View Data' %}</h5>
-        <p class="medium-txt">{% trans 'Plot your data in BioPy.' %}</p>
+        <h5 class="large-txt">{% trans 'Export Data' %}</h5>
+        <p class="medium-txt">{% trans 'Output data stored in BioPy to local files.' %}</p>
         </div>
       </a>
     </div>

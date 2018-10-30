@@ -1,28 +1,37 @@
 import os
 import tempfile
+from builtins import getattr
+from datetime import datetime
 
-from .models import Batch, Class, Endpoint, Event, Node, Process, Variable
-from .permissions import hasBatchPermission, hasDataPermission, \
-    hasEndpointPermission, hasNodePermission, hasProcessPermission
-from .resources import ClassResource, EventResource, VariableResource
-from .serializers import BatchSerializer, ClassSerializer, EndpointSerializer, \
-    EventSerializer, NodeSerializer, ProcessSerializer, VariableSerializer
+from BioPyApp.forms import historian
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
 from django.utils.translation import gettext as _
 from django.views import generic
+from formtools.wizard.views import SessionWizardView
 from import_export.formats.base_formats import DEFAULT_FORMATS
-from import_export.forms import ConfirmImportForm, ImportForm
+from import_export.forms import ConfirmImportForm, ExportForm, ImportForm
 from import_export.resources import RowResult, modelresource_factory
 from import_export.tmp_storages import TempFolderStorage
 from rest_framework import generics
+
+from BioPyApp.models import Batch, Class, Endpoint, Event, Node, Process, \
+    Variable
+from BioPyApp.opcua import HistorianImporter
+from BioPyApp.permissions import hasBatchPermission, hasDataPermission, \
+    hasEndpointPermission, hasNodePermission, hasProcessPermission
+from BioPyApp.resources import ClassResource, EventResource, VariableResource
+from BioPyApp.serializers import BatchSerializer, ClassSerializer, \
+    EndpointSerializer, EventSerializer, NodeSerializer, ProcessSerializer, \
+    VariableSerializer
 
 
 # Universal
@@ -48,19 +57,69 @@ class TermsView(generic.TemplateView):
 class ActionsView(generic.TemplateView):
     template_name = 'actions/actions.html'
 
-## Data Acquisition
+## Input Data
 @method_decorator(login_required,name='dispatch')
-class AcquisitionView(generic.TemplateView):
-    template_name = 'actions/acquisition/acquisition.html'
+class InputView(generic.TemplateView):
+    template_name = 'actions/input/input.html'
 
-### Online
+### Realtime
 
-### Offline
+### Historian 
+@method_decorator(login_required,name="dispatch")
+class HistorianWizardView(SessionWizardView):
+    form_list = [
+        ("step_one", historian.StepOneForm),
+        ("step_two", historian.StepTwoForm),
+        ("step_three", historian.StepThreeForm),
+        ("step_four", historian.StepFourForm),
+        ("step_five", historian.StepFiveForm),
+        ]
 
-### Import
+    template_name = "actions/input/historian/historian.html"
+
+    def get_form_kwargs(self, step):
+        if step == 'step_one': #selects process
+            return {'user': self.request.user}
+        elif step == 'step_two' : # selects batch
+            return {'process':self.get_cleaned_data_for_step('step_one').get('process')}
+        elif step == 'step_three': # selects limits
+            return {'batch':self.get_cleaned_data_for_step('step_two').get('batch')}
+        elif step == 'step_four': # selects endpoints
+            return {'user':self.request.user}
+        elif step == 'step_five': # selectes nodes
+            return {'endpoints':self.get_cleaned_data_for_step('step_four').get('endpoints')}
+        else:
+            return {}
+    
+    def done(self,form_list,**kwargs):
+        context={}
+        template = 'actions/input/historian/historian_importer.html'
+        params=[form.cleaned_data for form in form_list]
+        results=HistorianImporter(params)
+        context['results'] = results
+        return TemplateResponse(self.request, [template], context)
+
+
+@login_required
+def historian_processor(request,datasets):
+    
+    variables_dataset = datasets.getattr('variables',None)
+    classes_dataset = datasets.getattr('classes',None)
+    events_dataset = datasets.getattr('events',None)
+
+    if variables_dataset:
+        VariableResource(request.user).import_data(dataset=variables_dataset,dry_run=False,raise_errors=True,user=request.user)
+    if classes_dataset:
+        ClassResource(request.user).import_data(dataset=classes_dataset,dry_run=False,raise_errors=True,user=request.user)
+    if events_dataset:
+        EventResource(request.user).import_data(dataset=events_dataset,dry_run=False,raise_errors=True,user=request.user)
+
+    return HttpResponseRedirect(reverse('home'))
+    
+### Import Files
 @method_decorator(login_required,name='dispatch')
 class ImportView(generic.TemplateView):
-    template_name = 'actions/acquisition/import/import.html'
+    template_name = 'actions/input/import/import.html'
 
 def importer(request,resource,template):
     '''
@@ -145,13 +204,13 @@ class VariableFileImport(generic.View):
         return importer(
             self.request,
             VariableResource(self.request.user),
-            'actions/acquisition/import/variable_file_import.html')
+            'actions/input/import/variable_file_import.html')
 
     def post(self,*args,**kwargs):
         return importer(
             self.request,
             VariableResource(self.request.user),
-            'actions/acquisition/import/variable_file_import.html')
+            'actions/input/import/variable_file_import.html')
 
 #### VariableFileProcessingImport
 @method_decorator(login_required,name='dispatch')
@@ -160,7 +219,7 @@ class VariableFileImportProcessing(generic.View):
         return processor(
             self.request,
             VariableResource(self.request.user),
-            'actions/acquisition/import/variable_file_import.html',
+            'actions/input/import/variable_file_import.html',
             'variables_list')    
         
 #### EventFileImport   
@@ -170,13 +229,13 @@ class EventFileImport(generic.TemplateView):
         return importer(
             self.request,
             EventResource(self.request.user),
-            'actions/acquisition/import/event_file_import.html')
+            'actions/input/import/event_file_import.html')
 
     def post(self,*args,**kwargs):
         return importer(
             self.request,
             EventResource(self.request.user),
-            'actions/acquisition/import/event_file_import.html')
+            'actions/input/import/event_file_import.html')
 
 #### EventFileProcessingImport
 @method_decorator(login_required,name='dispatch')
@@ -185,7 +244,7 @@ class EventFileImportProcessing(generic.View):
         return processor(
             self.request,
             EventResource(self.request.user),
-            'actions/acquisition/import/event_file_import.html',
+            'actions/input/import/event_file_import.html',
             'events_list')
 
 #### ClassFileImport   
@@ -195,13 +254,13 @@ class ClassFileImport(generic.View):
         return importer(
             self.request,
             ClassResource(self.request.user),
-            'actions/acquisition/import/class_file_import.html')
+            'actions/input/import/class_file_import.html')
 
     def post(self,*args,**kwargs):
         return importer(
             self.request,
             ClassResource(self.request.user),
-            'actions/acquisition/import/class_file_import.html')
+            'actions/input/import/class_file_import.html')
 
 #### ClassFileProcessingImport
 @method_decorator(login_required,name='dispatch')
@@ -210,8 +269,89 @@ class ClassFileImportProcessing(generic.View):
         return processor(
             self.request,
             ClassResource(self.request.user),
-            'actions/acquisition/import/class_file_import.html',
+            'actions/input/import/class_file_import.html',
             'classes_list')  
+
+
+## Output Data
+@method_decorator(login_required,name='dispatch')
+class OutputView(generic.TemplateView):
+    template_name = 'actions/output/output.html'
+
+def exporter(request,resource,template):
+
+    context = {}
+    formats = [f for f in DEFAULT_FORMATS if f().can_export()]
+    form = ExportForm(formats, request.POST or None)
+        
+    if form.is_valid():
+        file_format = formats[int(form.cleaned_data['file_format'])]()
+        filename = "%s-%s.%s" % (resource._meta.model.__name__,datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),file_format.get_extension())
+        data = resource.export()
+        export_data = file_format.export_data(data)
+        content_type = file_format.get_content_type()
+        response = HttpResponse(export_data, content_type=content_type)
+        response['Content-Disposition'] = 'attachment; filename=%s' % (filename,)
+        return response
+
+    context['form'] = form
+    return TemplateResponse(request,[template],context)
+
+@method_decorator(login_required, name="dispatch") 
+class VariableFileExport(generic.View):
+    def get(self,*args, **kwargs):
+        return exporter(self.request,
+            VariableResource(self.request.user),
+            'actions/output/export/variable_file_export.html')
+
+    def post(self,*args,**kwargs):
+        return exporter(
+            self.request,
+            VariableResource(self.request.user),
+            'actions/output/export/variable_file_export.html')
+
+@method_decorator(login_required, name="dispatch") 
+class ClassFileExport(generic.View):
+    def get(self,*args, **kwargs):
+        return exporter(self.request,
+            ClassResource(self.request.user),
+            'actions/output/export/class_file_export.html')
+
+    def post(self,*args,**kwargs):
+        return exporter(
+            self.request,
+            ClassResource(self.request.user),
+            'actions/output/export/class_file_export.html')
+
+@method_decorator(login_required, name="dispatch") 
+class EventFileExport(generic.View):
+    def get(self,*args, **kwargs):
+        return exporter(self.request,
+            EventResource(self.request.user),
+            'actions/output/export/event_file_export.html')
+
+    def post(self,*args,**kwargs):
+        return exporter(
+            self.request,
+            EventResource(self.request.user),
+            'actions/output/export/event_file_export.html')
+
+### Dataset
+@method_decorator(login_required,name='dispatch')
+class DatasetView(generic.TemplateView):
+    template_name = 'actions/output/dataset/dataset.html'
+#TODO: All types
+
+### Export Files
+@method_decorator(login_required,name='dispatch')
+class ExportView(generic.TemplateView):
+    template_name = 'actions/output/export/export.html'
+#TODO: ALL types
+
+## View Data
+@method_decorator(login_required,name='dispatch')
+class ViewView(generic.TemplateView):
+    template_name = 'actions/view/view.html'
 
 # API views
 ## Real-time

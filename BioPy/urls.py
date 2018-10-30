@@ -43,31 +43,45 @@ urlpatterns = [
     path('newsletter/',include('newsletter.urls')),
 
     # Actions
-    path('actions/',views.ActionsView.as_view()),
+    path('actions/',views.ActionsView.as_view(),name="actions"),
     
-    ## Data acquisition
-    path('actions/acquisition/',views.AcquisitionView.as_view()),
+    ## Input
+    path('actions/input/',views.InputView.as_view(),name="input"),
 
     ### Real-time OPCUA
+    path('actions/input/realtime/',views.ImportView.as_view(),name="realtime"),
 
     ### Historian OPCUA
-
-    ### Remote Databases
+    path('actions/input/historian/',views.HistorianWizardView.as_view(),name="historian"),
+    #path('actions/input/historian/importer/<data>/',views.historian_importer,name="historian_importer"),
+    #path('actions/input/historian/processor/<data>/',views.historian_processor,name="historian_processor"),
 
     ### Import Files
-    path('actions/acquisition/import/',views.ImportView.as_view(),name="import"),
-    path('actions/acquisition/import/variables/', views.VariableFileImport.as_view(),name="import_variables"),
-    path('actions/acquisition/import/variables/processing/', views.VariableFileImportProcessing.as_view(),name="import_variables_processing"),
-    path('actions/acquisition/import/events/', views.EventFileImport.as_view(),name="import_events"),
-    path('actions/acquisition/import/events/processing/', views.EventFileImportProcessing.as_view(),name="import_events_processing"),
-    path('actions/acquisition/import/classes/', views.ClassFileImport.as_view(),name="import_classes"),
-    path('actions/acquisition/import/classes/processing/', views.ClassFileImportProcessing.as_view(),name="import_classes_processing"),
+    path('actions/input/import/',views.ImportView.as_view(),name="import"),
+    path('actions/input/import/variables/', views.VariableFileImport.as_view(),name="import_variables"),
+    path('actions/input/import/variables/processing/', views.VariableFileImportProcessing.as_view(),name="import_variables_processing"),
+    path('actions/input/import/events/', views.EventFileImport.as_view(),name="import_events"),
+    path('actions/input/import/events/processing/', views.EventFileImportProcessing.as_view(),name="import_events_processing"),
+    path('actions/input/import/classes/', views.ClassFileImport.as_view(),name="import_classes"),
+    path('actions/input/import/classes/processing/', views.ClassFileImportProcessing.as_view(),name="import_classes_processing"),
 
+    ## Output
+    path('actions/output/',views.OutputView.as_view(),name="output"),
 
-
-
-
-
+    ###Dataframes
+    path('actions/output/dataset/',views.DatasetView.as_view(),name="dataset"),
+    # path('actions/output/dataset/tensor/', views.VariableDataframe.as_view(),name="dataframe_variables"),
+    # Alltypes
+    # path('actions/output/dataset/dataframes/', views.EventDataframe.as_view(),name="dataframe_events"),
+    # ALltypes
+    
+    # ###Export data
+    path('actions/output/export/',views.ExportView.as_view(),name="export"),
+    path('actions/output/export/variables/', views.VariableFileExport.as_view(),name="export_variables"),
+    path('actions/output/export/events/', views.EventFileExport.as_view(),name="export_events"),
+    path('actions/output/export/classes/', views.ClassFileExport.as_view(),name="export_classes"),
+    
+    path('actions/output/export/',views.ViewView.as_view(),name="view"),
 
 
     # API

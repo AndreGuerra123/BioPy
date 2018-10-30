@@ -103,7 +103,9 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'newsletter',
     'contact_form',
-    'import_export'
+    'import_export',
+    'formtools',
+    'bootstrap_datepicker_plus',
 
 ]
 
