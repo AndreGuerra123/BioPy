@@ -1,0 +1,14 @@
+{% extends pop|yesno:"popup.html,base.html" %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+<div class="glb">	
+<div class="glb-v">
+<div class="glb-v-e">
+{% for message in messages %}
+    <div class="alert alert-{{message.tags}}">{{ message }}</div>
+{% endfor %}
+</div>
+</div>
+</div>
+{% endblock %}

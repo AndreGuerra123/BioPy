@@ -3,35 +3,41 @@ import tempfile
 from builtins import getattr
 from datetime import datetime
 
-from BioPyApp.forms import historian
+from BioPyApp.forms import connection, historian, structure
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
+from django.utils.html import escape, escapejs
 from django.utils.translation import gettext as _
 from django.views import generic
+from django_addanother.views import CreatePopupMixin, UpdatePopupMixin
+from BioPyApp.widgets import DeletePopupMixin
+
 from formtools.wizard.views import SessionWizardView
 from import_export.formats.base_formats import DEFAULT_FORMATS
 from import_export.forms import ConfirmImportForm, ExportForm, ImportForm
 from import_export.resources import RowResult, modelresource_factory
 from import_export.tmp_storages import TempFolderStorage
 from rest_framework import generics
+from rest_framework.generics import CreateAPIView
 
 from BioPyApp.models import Batch, Class, Endpoint, Event, Node, Process, \
     Variable
-from BioPyApp.opcua import HistorianImporter
 from BioPyApp.permissions import hasBatchPermission, hasDataPermission, \
     hasEndpointPermission, hasNodePermission, hasProcessPermission
 from BioPyApp.resources import ClassResource, EventResource, VariableResource
 from BioPyApp.serializers import BatchSerializer, ClassSerializer, \
     EndpointSerializer, EventSerializer, NodeSerializer, ProcessSerializer, \
     VariableSerializer
+from newsletter.compat import get_context
 
 
 # Universal
@@ -68,11 +74,11 @@ class InputView(generic.TemplateView):
 @method_decorator(login_required,name="dispatch")
 class HistorianWizardView(SessionWizardView):
     form_list = [
-        ("step_one", historian.StepOneForm),
-        ("step_two", historian.StepTwoForm),
-        ("step_three", historian.StepThreeForm),
-        ("step_four", historian.StepFourForm),
-        ("step_five", historian.StepFiveForm),
+        ("step_one", structure.SelectProcessForm),
+        ("step_two", structure.SelectBatchForm),
+        ("step_three", historian.StartEndForm),
+        ("step_four", connection.SelectMultipleEndpointsForm),
+        ("step_five", connection.SelectMultipleNodesForm),
         ]
 
     template_name = "actions/input/historian/historian.html"
@@ -272,7 +278,6 @@ class ClassFileImportProcessing(generic.View):
             'actions/input/import/class_file_import.html',
             'classes_list')  
 
-
 ## Output Data
 @method_decorator(login_required,name='dispatch')
 class OutputView(generic.TemplateView):
@@ -346,14 +351,113 @@ class DatasetView(generic.TemplateView):
 @method_decorator(login_required,name='dispatch')
 class ExportView(generic.TemplateView):
     template_name = 'actions/output/export/export.html'
-#TODO: ALL types
 
-## View Data
+## View
 @method_decorator(login_required,name='dispatch')
 class ViewView(generic.TemplateView):
     template_name = 'actions/view/view.html'
 
+## Configure
+@method_decorator(login_required,name='dispatch')
+class ConfigureView(generic.TemplateView):
+    template_name = 'actions/configure/configure.html'
+
+### Connections
+@method_decorator(login_required,name='dispatch')
+class ConnectionsWizardView(SessionWizardView):
+    form_list = [
+        ("step_one", connection.SelectEndpointForm),
+        ("step_two", connection.SelectNodeForm),
+        ]
+
+    template_name = "actions/configure/connections/connections.html"
+
+    def get_form_kwargs(self, step):
+        if step == 'step_one': #inputs user
+            return {'user': self.request.user}
+        elif step == 'step_two' : #inputs endpoint
+            return {'endpoints':[self.get_cleaned_data_for_step('step_one').get('endpoint')]}
+        else:
+            return {}
+    
+    def done(self,form_list,**kwargs):
+        return redirect('configure')
+
+### Stucture
+@method_decorator(login_required,name='dispatch')
+class StructureWizardView(SessionWizardView):
+    form_list = [
+        ("step_one", structure.SelectProcessForm),
+        ("step_two", structure.SelectBatchForm),
+        ("step_three", structure.DataConfigurationForm)
+        ]
+
+    template_name = "actions/configure/structure/structure.html"
+
+    def get_form_kwargs(self, step):
+        if step == 'step_one': #inputs user
+            return {'user': self.request.user}
+        elif step == 'step_two' : #inputs endpoint
+            return {'process':self.get_cleaned_data_for_step('step_one').get('process')}
+        elif step == "step_three" :
+            return {'batch':self.get_cleaned_data_for_step('step_two').get('batch')}
+        else:
+            return {}
+    
+    def done(self,form_list,**kwargs):
+        return redirect('configure')
+
 # API views
+class MessageView(generic.TemplateView):
+    template_name = 'crud/message.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pop"] = kwargs['pop']
+        return context
+    
+class CreateMixin(SuccessMessageMixin):
+    fields = '__all__'
+    template_name = 'crud/form.html'
+    success_url = reverse_lazy('message',kwargs={"pop":True})
+     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["action"] = "Create"
+        context["name"]=self.model.__name__
+        return context
+
+    def get_success_message(self, cleaned_data):
+        return self.model.__name__+" was created successfully."
+
+class UpdateMixin(SuccessMessageMixin):
+    fields = '__all__'
+    template_name = 'crud/form.html'
+    success_url = reverse_lazy('message',kwargs={"pop":True})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["action"] = "Update"
+        context["name"] = self.model.__name__
+        return context
+
+    def get_success_message(self,cleaned_data):
+        return self.model.__name__+" was updated successfully."
+
+class DeleteMixin(SuccessMessageMixin):
+    fields = '__all__'
+    template_name = 'crud/form.html'
+    success_url = reverse_lazy('message',kwargs={"pop":True})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["action"] = "Delete"
+        context["name"] = self.model.__name__
+        return context
+
+    def get_success_message(self,cleaned_data):
+        return self.model.__name__+" was deleted successfully."
+
 ## Real-time
 @method_decorator(login_required,name='dispatch')
 class EndpointList(generics.ListCreateAPIView):
@@ -377,6 +481,18 @@ class EndpointDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [hasEndpointPermission]
     queryset = Endpoint.objects.all()
 
+@method_decorator(login_required, name="dispatch")
+class EndpointCreate(CreatePopupMixin,CreateMixin,generic.CreateView):
+    model = Endpoint
+
+@method_decorator(login_required, name="dispatch")
+class EndpointUpdate(UpdatePopupMixin,UpdateMixin,generic.UpdateView):
+    model = Endpoint
+
+@method_decorator(login_required, name="dispatch")
+class EndpointDelete(DeletePopupMixin,DeleteMixin,generic.DeleteView):
+    model = Endpoint
+           
 @method_decorator(login_required,name='dispatch')
 class NodeList(generics.ListCreateAPIView):
     """
@@ -399,6 +515,18 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [hasNodePermission]
     queryset = Node.objects.all()
 
+@method_decorator(login_required, name="dispatch")
+class NodeCreate(CreatePopupMixin,CreateMixin,generic.CreateView):
+    model = Node
+
+@method_decorator(login_required, name="dispatch")
+class NodeUpdate(UpdatePopupMixin,UpdateMixin,generic.UpdateView):
+    model = Node
+
+@method_decorator(login_required, name="dispatch")
+class NodeDelete(DeletePopupMixin,DeleteMixin,generic.DeleteView):
+    model = Node
+    
 ## Historian
 
 @method_decorator(login_required, name='dispatch')
@@ -423,6 +551,18 @@ class ProcessDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [hasProcessPermission]
     queryset = Process.objects.all()
 
+@method_decorator(login_required, name="dispatch")
+class ProcessCreate(CreatePopupMixin,CreateMixin,generic.CreateView):
+    model = Process
+
+@method_decorator(login_required, name="dispatch")
+class ProcessUpdate(UpdatePopupMixin,UpdateMixin,generic.UpdateView):
+    model = Process
+
+@method_decorator(login_required, name="dispatch")
+class ProcessDelete(DeletePopupMixin,DeleteMixin,generic.DeleteView):
+    model = Process
+
 @method_decorator(login_required, name='dispatch')
 class BatchList(generics.ListCreateAPIView):
     """
@@ -444,6 +584,18 @@ class BatchDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BatchSerializer
     permission_classes = [hasBatchPermission]
     queryset = Batch.objects.all()
+
+@method_decorator(login_required, name="dispatch")
+class BatchCreate(CreatePopupMixin, CreateMixin, generic.CreateView):
+    model = Batch
+
+@method_decorator(login_required, name="dispatch")
+class BatchUpdate(UpdatePopupMixin,UpdateMixin,generic.UpdateView):
+    model = Batch
+
+@method_decorator(login_required, name="dispatch")
+class BatchDelete(DeletePopupMixin,DeleteMixin,generic.DeleteView):
+    model = Batch
 
 @method_decorator(login_required, name='dispatch')
 class VariableList(generics.ListCreateAPIView):
@@ -467,6 +619,18 @@ class VariableDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [hasDataPermission]
     queryset = Variable.objects.all()
 
+@method_decorator(login_required, name="dispatch")
+class VariableCreate(CreatePopupMixin,CreateMixin,generic.CreateView):
+    model = Variable
+
+@method_decorator(login_required, name="dispatch")
+class VariableUpdate(UpdatePopupMixin,UpdateMixin,generic.UpdateView):
+    model = Variable
+
+@method_decorator(login_required, name="dispatch")
+class VariableDelete(DeletePopupMixin,DeleteMixin,generic.DeleteView):
+    model = Variable
+
 @method_decorator(login_required, name='dispatch')
 class EventList(generics.ListCreateAPIView):
     """
@@ -488,7 +652,20 @@ class EventDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = EventSerializer
     permission_classes = [hasDataPermission]
     queryset = Event.objects.all()
+
+@method_decorator(login_required, name="dispatch")
+class EventCreate(CreatePopupMixin,CreateMixin,generic.CreateView):
+    model = Event
     
+@method_decorator(login_required, name="dispatch")
+class EventUpdate(UpdatePopupMixin,UpdateMixin,generic.UpdateView):
+    model = Event
+
+@method_decorator(login_required, name="dispatch")
+class EventDelete(DeletePopupMixin,DeleteMixin,generic.DeleteView):
+    model = Event
+   
+
 @method_decorator(login_required, name='dispatch')
 class ClassList(generics.ListCreateAPIView):
     """
@@ -510,5 +687,17 @@ class ClassDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ClassSerializer
     permission_classes = [hasDataPermission]
     queryset = Class.objects.all()
-    
+
+
+@method_decorator(login_required, name="dispatch")
+class ClassCreate(CreatePopupMixin,CreateMixin,generic.CreateView):
+    model = Class
+  
+@method_decorator(login_required, name="dispatch")
+class ClassUpdate(UpdatePopupMixin,UpdateMixin,generic.UpdateView):
+    model = Class 
+
+@method_decorator(login_required, name="dispatch")
+class ClassDelete(DeletePopupMixin,DeleteMixin,generic.DeleteView):
+    model = Class
 

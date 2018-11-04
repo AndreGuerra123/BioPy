@@ -12,50 +12,55 @@ from django.forms.models import InlineForeignKeyField
 class Endpoint(models.Model):
     POLICIES=[('Basic128Rsa15','Basic128Rsa15'),
               ('Basic256','Basic256'),
-              ('None','None'),
               ('Basic256Sha256','Basic256Sha256')]
     MODES=[('Sign','Sign'),
-           ('None_','None'),
            ('SignAndEncrypt','SignAndEncrypt')]
 
     owner = models.ForeignKey(User,on_delete=models.CASCADE)
     url = models.CharField(max_length=200)
-    policy = models.CharField(choices=POLICIES,max_length=50)
-    mode = models.CharField(choices=MODES,max_length=50)
+    policy = models.CharField(choices=POLICIES,max_length=50, blank=True, null=True)
+    mode = models.CharField(choices=MODES,max_length=50, blank=True, null=True)
     certificate = models.FileField(blank=True,null=True)
     private_key = models.FileField(blank=True,null=True)
     server_certificate = models.FileField(blank=True,null=True)
+    timeout = models.IntegerField(default=4)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-    def validate_unique(self,exclude=None):
-        existing = [ep.url for ep in Endpoint.objects.filter(owner=self.owner)]
-        if not self.unique_url(self.url,existing):
+    def get_client(self):
+        return OPCUAClient(self)
+        
+    def get_unique_info(self,url):
+        parsed = urlparse(url)
+        return [parsed.hostname,parsed.port,parsed.path]
+
+    def validate(self):
+        existing_info = [self.get_unique_info(ep.url) for ep in Endpoint.objects.filter(owner=self.owner)]
+        if self.get_unique_info(self.url) in existing_info:
             raise ValidationError({'url':['Endpoint url must have unique hostname, port and path combination per user.',]})
-    
-    def unique_url(self,url,urls):
-        for urlt in urls:
-            if self.is_equal_url(url,urlt):
-                return False
-        return True
+        
+        all_together=['policy','mode','certificate','private_key']
+        if any([getattr(self, field, None) for field in all_together]) and not all([getattr(self, field, None) for field in all_together]):
+            raise ValidationError({'url':['Security fields must all be null or filled together.',]})
 
-    def is_equal_url(self,url1,url2):
-        url1_parsed = urlparse(url1)
-        url2_parsed = urlparse(url2)
-        if(url1_parsed.netloc == url2_parsed.netloc and url1_parsed.path==url2_parsed.path):
-            return True
-        else:
-            return False
-
+        try:
+            client=OPCUAClient(self)
+            client.connect()
+        except Exception as e:
+            raise ValidationError({'url':['Could not establish initial connection. '+str(e),]})
+        finally:
+            try:
+                client.disconnect()
+            except:
+                pass
+                   
     def save(self, *args, **kwargs):
-        self.validate_unique()
+        self.validate()
         super(Endpoint, self).save(*args, **kwargs)
 
     def __str__(self):
         return " : ".join([str(self.id), self.url, self.policy, self.mode, self.owner.username, self.modified.replace(microsecond=0).isoformat(' ')])
-
-        
-
+      
 class Node(models.Model):
     TYPES=[("variable","Variable"),("classsifier","Classifier"),("event","Event"),("spectrum","Spectrum")]
     endpoint = models.ForeignKey(to=Endpoint,on_delete=models.CASCADE)
@@ -68,9 +73,6 @@ class Node(models.Model):
 
     def __str__(self):
         return " : ".join([str(self.id), self.nodeid,self.type,str(self.endpoint), self.modified.replace(microsecond=0).isoformat(' ')])
-
-        
-
 
 class Process(models.Model):
     PROCESS_TYPES=(
@@ -155,3 +157,6 @@ class Class(models.Model):
     def __str__(self):
         return " : ".join([str(self.id), self.batch.process.name, self.batch.name, self.name, self.value, self.modified.replace(microsecond=0).isoformat(' ')])
 
+
+#Anti circular dependency
+from .opcua import OPCUAClient

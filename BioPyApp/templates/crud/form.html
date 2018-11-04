@@ -1,0 +1,23 @@
+{% extends view.is_popup|yesno:"popup.html,base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% block content %}
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+{{ form.media }}
+<div class="glb">	
+<div class="glb-v">
+<div class="glb-v-e">
+<h2 class="large-txt">{% blocktrans %}{{action}}&nbsp;{{name}}{% endblocktrans %}</h2>
+<hr class="mt-0 mb-4">
+</div>
+<div class="col-md-8 medium-txt">
+<form action="." method="POST">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <input class="btn btn-success" type="submit" value="{% blocktrans %}{{action}}{% endblocktrans %}"/>
+</form>
+</div>
+</div>
+</div>
+{% endblock %}

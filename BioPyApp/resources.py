@@ -6,8 +6,7 @@ from django.core.exceptions import ValidationError
 from import_export import fields, resources
 from import_export.widgets import CharWidget, ForeignKeyWidget
 
-from BioPyApp.common import rgetattr
-from BioPyApp.models import Batch, Class, Event, Process, Variable
+from .models import Batch, Class, Event, Process, Variable
 
 
 class ProcessBatchForeignKeyWidget(ForeignKeyWidget):
@@ -36,7 +35,6 @@ class ProcessBatchResource(resources.ModelResource):
         self.user = user
         super().__init__(*args, **kwargs)
 
-
 class VariableResource(ProcessBatchResource):    
     class Meta:        
         model = Variable
@@ -51,7 +49,6 @@ class VariableResource(ProcessBatchResource):
             return Variable.objects.filter(batch__process__owner=self.user)
         else:
             return Variable.objects.all()
-
 
 class EventResource(ProcessBatchResource):
 

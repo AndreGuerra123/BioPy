@@ -19,6 +19,7 @@ cryptography = "*"
 django-import-export = "*"
 django-formtools = "*"
 django-bootstrap-datepicker-plus = "*"
+django-addanother = "*"
 
 [dev-packages]
 pylint = "<2.0.0"

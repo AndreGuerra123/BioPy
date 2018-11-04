@@ -106,6 +106,7 @@ INSTALLED_APPS = [
     'import_export',
     'formtools',
     'bootstrap_datepicker_plus',
+    'django_addanother'
 
 ]
 

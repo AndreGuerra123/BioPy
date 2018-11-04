@@ -14,6 +14,7 @@
     <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
     <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
     <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+    <li data-target="#carouselExampleIndicators" data-slide-to="3"></li>
   </ol>
   <div class="carousel-inner">
     <div class="carousel-item active">
@@ -35,11 +36,20 @@
       </a>
     </div>
     <div class="carousel-item">
-      <a href="{% url 'import_classes' %}">
+      <a href="{% url 'view' %}">
         <img class="d-block m-auto" src={% static 'images/view.png' %}>
         <div class="carousel-caption d-none d-md-block">
         <h5 class="large-txt">{% trans 'View Data' %}</h5>
         <p class="medium-txt">{% trans 'Plot your data in BioPy.' %}</p>
+        </div>
+      </a>
+    </div>
+    <div class="carousel-item">
+      <a href="{% url 'configure' %}">
+        <img class="d-block m-auto" src={% static 'images/configure.png' %}>
+        <div class="carousel-caption d-none d-md-block">
+        <h5 class="large-txt">{% trans 'Configure Settings' %}</h5>
+        <p class="medium-txt">{% trans 'Configure connectivity and data settings in BioPy.' %}</p>
         </div>
       </a>
     </div>

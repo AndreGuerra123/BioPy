@@ -38,6 +38,8 @@ urlpatterns = [
 
     path('accounts/', include('allauth.urls')),
 
+    path('message/<pop>/',views.MessageView.as_view(),name="message"),
+
     # Newletter
 
     path('newsletter/',include('newsletter.urls')),
@@ -81,37 +83,58 @@ urlpatterns = [
     path('actions/output/export/events/', views.EventFileExport.as_view(),name="export_events"),
     path('actions/output/export/classes/', views.ClassFileExport.as_view(),name="export_classes"),
     
-    path('actions/output/export/',views.ViewView.as_view(),name="view"),
+    ## View
+    path('actions/view/',views.ViewView.as_view(),name="view"),
+
+    ## Configure
+    path('actions/configure/',views.ConfigureView.as_view(),name="configure"),
+    path('actions/configure/connections',views.ConnectionsWizardView.as_view(),name="connections"),
+    path('actions/configure/structure',views.StructureWizardView.as_view(),name="structure"),
 
 
     # API
     ## Real-time
    
     path('endpoints/',views.EndpointList.as_view(),name="endpoints_list"),
+    path('endpoints/create/',views.EndpointCreate.as_view(),name="create_endpoint"),
+    path('endpoints/update/<pk>/',views.EndpointUpdate.as_view(),name="update_endpoint"),
+    path('endpoints/delete/<pk>/',views.EndpointDelete.as_view(),name="delete_endpoint"),
     path('endpoints/<pk>/', views.EndpointDetail.as_view()),
 
     path('nodes/',views.NodeList.as_view(),name="nodes_list"),
+    path('nodes/create/',views.NodeCreate.as_view(),name="create_node"),
+    path('nodes/update/<pk>/',views.NodeUpdate.as_view(),name="update_node"),
+    path('nodes/delete/<pk>/',views.NodeDelete.as_view(),name="delete_node"),
     path('nodes/<pk>/', views.NodeDetail.as_view()),
 
     ## Historian
-
     path('processes/', views.ProcessList.as_view(),name="processes_list"),
-
+    path('processes/create/',views.ProcessCreate.as_view(),name="create_process"),
+    path('processes/update/<pk>/',views.ProcessUpdate.as_view(),name="update_process"),
+    path('processes/delete/<pk>/',views.ProcessDelete.as_view(),name="delete_process"),
     path('processes/<pk>/', views.ProcessDetail.as_view()),
 
     path('batches/', views.BatchList.as_view(),name="batches_list"),
-
+    path('batches/create/',views.BatchCreate.as_view(),name="create_batch"),
+    path('batches/update/<pk>/',views.BatchUpdate.as_view(),name="update_batch"),
+    path('batches/delete/<pk>/',views.BatchDelete.as_view(),name="delete_batch"),
     path('batches/<pk>/', views.BatchDetail.as_view()),
 
     path('variables/', views.VariableList.as_view(),name="variables_list"),
-
+    path('variables/create/',views.VariableCreate.as_view(),name="create_variable"),
+    path('variables/update/<pk>/',views.VariableUpdate.as_view(),name="update_variable"),
+    path('variables/delete/<pk>/',views.VariableDelete.as_view(),name="delete_variable"),
     path('variables/<pk>/', views.VariableDetail.as_view()),
 
     path('events/', views.EventList.as_view(),name="events_list"),
-
+    path('events/create/',views.EventCreate.as_view(),name="create_event"),
+    path('events/update/<pk>/',views.EventUpdate.as_view(),name="update_event"),
+    path('events/delete/<pk>/',views.EventDelete.as_view(),name="delete_event"),
     path('events/<pk>/', views.EventDetail.as_view()),
 
     path('classes/', views.ClassList.as_view(),name="classes_list"),
-
+    path('classes/create/',views.ClassCreate.as_view(),name="create_class"),
+    path('classes/update/<pk>/',views.ClassUpdate.as_view(),name="update_class"),
+    path('classes/delete/<pk>/',views.ClassDelete.as_view(),name="delete_class"),
     path('classes/<pk>/', views.ClassDetail.as_view()),
 ]

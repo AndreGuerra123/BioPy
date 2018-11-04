@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %} 
+{% block content %}
+<div class="glb">	
+<div class="glb-v">
+<div class="glb-v-e">
+    <h1 class="large-txt">{% trans 'Configure Settings' %}</h1>
+    <hr class="mt-0 mb-4">
+</div>
+<div class="glb-v-e">
+<div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+  <ol class="carousel-indicators">
+    <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+    <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+  </ol>
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <a href="{% url 'connections' %}">
+        <img class="d-block m-auto" src={% static 'images/connect.png' %}>
+        <div class="carousel-caption d-none d-md-block">
+        <h5 class="large-txt">{% trans 'OPCUA Connections' %}</h5>
+        <p class="medium-txt">{% trans 'Configure the OPCUA connections in BioPy' %}</p>
+        </div>
+      </a>
+    </div>
+    <div class="carousel-item">
+      <a href="{% url 'structure' %}">
+        <img class="d-block m-auto" src={% static 'images/structure.png' %}>
+        <div class="carousel-caption d-none d-md-block">
+        <h5 class="large-txt">{% trans 'Project Structure' %}</h5>
+        <p class="medium-txt">{% trans 'Configure the project structure in BioPy.' %}</p>
+        </div>
+      </a>
+    </div>
+  </div>
+  <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="sr-only">{% trans 'Previous' %}</span>
+  </a>
+  <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="sr-only">{% trans 'Next' %}</span>
+  </a>
+</div>   
+</div>
+</div>
+</div>
+{% endblock %}
