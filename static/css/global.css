@@ -118,6 +118,16 @@ ul ul a {
     background: rgb(76, 91, 148);
 }
 
+ul ul li {
+    font-size: 0.9em !important;
+    padding-left: 30px !important;
+    background: rgb(76, 91, 148);
+}
+
+a img {
+    margin: 5%;
+}
+
 
 ul.CTAs {
     padding: 20px;

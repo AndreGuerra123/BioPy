@@ -44,13 +44,12 @@
         <!-- Sidebar Holder -->
         <nav id="sidebar">
             <div class="sidebar-header">
-                <h3>BioPy</h3>
+                <a class="h3"><img src="{% static "images/logo.png" %}" width="32" height="32"></img>BioPy</a>
             </div>
-
             <ul class="list-unstyled components">
             <li>
                 {% if user.is_authenticated %}
-                <a href="#actionsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Actions</a>
+                <a href="#actionsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><img src="{% static "images/logo.png" %}" width="30" height="30"></img>Actions</a>
                 <ul class="collapse list-unstyled" id="actionsSubmenu">
                     <li>
                        <a href="#inputSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Input</a>
@@ -70,10 +69,10 @@
                        <a href="#outputSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Output</a>
                         <ul class="collapse list-unstyled" id="outputSubmenu">
                         <li>
-                            <a href="/actions/output/dataset/">Dataset</a>
+                            <a href="{% url 'df'%}">Dataframe</a>
                         </li>
                         <li>
-                            <a href="/actions/output/export/">Export Files</a>
+                            <a href="{% url 'export'%}">Export Files</a>
                         </li>
                         </ul>
                     </li>
@@ -85,6 +84,17 @@
                         </li>
                         <li>
                             <a href="/dataset/variables">Export Files</a>
+                        </li>
+                        </ul>
+                    </li>
+                    <li>
+                       <a href="#configureSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Configure</a>
+                       <ul class="collapse list-unstyled" id="configureSubmenu">
+                        <li>
+                            <a href="{% url "configure_connections" %}">Connections</a>
+                        </li>
+                        <li>
+                            <a href="{% url "configure_structure" %}">Structure</a>
                         </li>
                         </ul>
                     </li>

@@ -30,6 +30,20 @@ class SelectBatchForm(forms.Form):
             ,reverse_lazy('update_batch',args=['__fk__'])
             ,reverse_lazy('delete_batch',args=['__fk__']))
 
+class SelectMultipleBatchesForm(forms.Form):
+    batches = forms.models.ModelMultipleChoiceField(queryset=None)
+    
+    def __init__(self, *args, **kwargs):
+        process = kwargs.pop('process')
+        super(SelectMultipleBatchesForm,self).__init__(*args, **kwargs)
+        self.fields['batches'].queryset = Batch.objects.filter(process=process)
+        self.fields['batches'].widget = CRUDWidgetWrapper(
+            self.fields['batches'].widget
+            ,reverse_lazy('create_batch')
+            ,reverse_lazy('update_batch',args=['__fk__'])
+            ,reverse_lazy('delete_batch',args=['__fk__']))
+
+
 class DataConfigurationForm(forms.Form):
 
     variables = forms.models.ModelChoiceField(queryset=None)

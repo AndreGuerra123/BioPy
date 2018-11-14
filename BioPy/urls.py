@@ -54,9 +54,10 @@ urlpatterns = [
     path('actions/input/realtime/',views.ImportView.as_view(),name="realtime"),
 
     ### Historian OPCUA
-    path('actions/input/historian/',views.HistorianWizardView.as_view(),name="historian"),
-    #path('actions/input/historian/importer/<data>/',views.historian_importer,name="historian_importer"),
-    #path('actions/input/historian/processor/<data>/',views.historian_processor,name="historian_processor"),
+    path('actions/input/historian/',views.HistorianImporterView.as_view(),name="historian"),
+    path('actions/input/historian/variables/',views.VariableHistorianImporterView.as_view(),name="historian_variables"),
+    path('actions/input/historian/events/',views.EventHistorianImporterView.as_view(),name="historian_events"),
+    path('actions/input/historian/classes/',views.ClassHistorianImporterView.as_view(),name="historian_classes"),
 
     ### Import Files
     path('actions/input/import/',views.ImportView.as_view(),name="import"),
@@ -71,12 +72,25 @@ urlpatterns = [
     path('actions/output/',views.OutputView.as_view(),name="output"),
 
     ###Dataframes
-    path('actions/output/dataset/',views.DatasetView.as_view(),name="dataset"),
-    # path('actions/output/dataset/tensor/', views.VariableDataframe.as_view(),name="dataframe_variables"),
-    # Alltypes
-    # path('actions/output/dataset/dataframes/', views.EventDataframe.as_view(),name="dataframe_events"),
-    # ALltypes
+    path('actions/output/dataframe/',views.DataframeView.as_view(),name="df"),
     
+    path('actions/output/dataframe/single/',views.SingleProcessDataframeView.as_view(),name="sp_df"),
+    
+    path('actions/output/dataframe/single/variable/',views.VariableSingleProcessDataframeView.as_view(),name="v_sp_df"),
+    path('actions/output/dataframe/single/variable/download/',views.VariableSingleProcessDataframeDownloadView.as_view(),name="d_v_sp_df"),
+    
+    path('actions/output/dataframe/single/event/',views.EventSingleProcessDataframeView.as_view(),name="e_sp_df"),
+    path('actions/output/dataframe/single/event/download/',views.EventSingleProcessDataframeDownloadView.as_view(),name="d_e_sp_df"),
+
+    path('actions/output/dataframe/single/variable/',views.ClassSingleProcessDataframeView.as_view(),name="c_sp_df"),
+    path('actions/output/dataframe/single/class/download/',views.ClassSingleProcessDataframeDownloadView.as_view(),name="d_c_sp_df"),
+
+    path('actions/output/dataframe/multi/',views.MultiProcessDataframeView.as_view(),name="mp_df"),
+
+    path('actions/output/dataframe/multi/variable/',views.VariableMultiProcessDataframeView.as_view(),name="v_mp_df"),
+    path('actions/output/dataframe/multi/event/',views.EventMultiProcessDataframeView.as_view(),name="e_mp_df"),
+    path('actions/output/dataframe/multi/class/',views.ClassMultiProcessDataframeView.as_view(),name="c_mp_df"),
+
     # ###Export data
     path('actions/output/export/',views.ExportView.as_view(),name="export"),
     path('actions/output/export/variables/', views.VariableFileExport.as_view(),name="export_variables"),
@@ -88,13 +102,12 @@ urlpatterns = [
 
     ## Configure
     path('actions/configure/',views.ConfigureView.as_view(),name="configure"),
-    path('actions/configure/connections',views.ConnectionsWizardView.as_view(),name="connections"),
-    path('actions/configure/structure',views.StructureWizardView.as_view(),name="structure"),
+    path('actions/configure/connections',views.ConnectionsWizardView.as_view(),name="configure_connections"),
+    path('actions/configure/structure',views.StructureWizardView.as_view(),name="configure_structure"),
 
 
     # API
     ## Real-time
-   
     path('endpoints/',views.EndpointList.as_view(),name="endpoints_list"),
     path('endpoints/create/',views.EndpointCreate.as_view(),name="create_endpoint"),
     path('endpoints/update/<pk>/',views.EndpointUpdate.as_view(),name="update_endpoint"),

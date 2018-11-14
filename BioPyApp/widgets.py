@@ -5,9 +5,9 @@ from django.contrib.admin.views.main import IS_POPUP_VAR
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
-DEFAULT_ADD_ICON = 'images/add-icon.png'
-DEFAULT_EDIT_ICON = 'images/edit-icon.png'
-DEFAULT_DELETE_ICON = 'images/delete-icon.png'
+DEFAULT_ADD_ICON = 'images/icons/add-icon.png'
+DEFAULT_EDIT_ICON = 'images/icons/edit-icon.png'
+DEFAULT_DELETE_ICON = 'images/icons/delete-icon.png'
 
 
 class DeletePopupMixin(BasePopupMixin):

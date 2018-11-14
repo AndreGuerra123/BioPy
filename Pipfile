@@ -20,6 +20,12 @@ django-import-export = "*"
 django-formtools = "*"
 django-bootstrap-datepicker-plus = "*"
 django-addanother = "*"
+numpy = "*"
+pandas = "*"
+django-pandas = "*"
+django-downloadview = "*"
+feather-format = "*"
+django-computed-property = "*"
 
 [dev-packages]
 pylint = "<2.0.0"
@@ -27,3 +33,6 @@ pylint = "<2.0.0"
 
 [requires]
 python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true

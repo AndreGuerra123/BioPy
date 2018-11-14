@@ -5,7 +5,7 @@
 <div class="glb">	
 <div class="glb-v">
 <div class="glb-v-e">
-    <h1 class="large-txt">{% trans 'Historian Importer' %}</h1>
+    <h1 class="large-txt">{% trans 'Create Dataframes' %}</h1>
     <hr class="mt-0 mb-4">
 </div>
 <div class="glb-v-e">
@@ -13,33 +13,23 @@
   <ol class="carousel-indicators">
     <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
     <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-    <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
   </ol>
   <div class="carousel-inner">
     <div class="carousel-item active">
-      <a href="{% url 'historian_variables' %}">
-        <img class="d-block m-auto" src={% static 'images/variables.png' %}>
+      <a href="{% url 'sp_df' %}">
+        <img class="d-block m-auto" src={% static 'images/single_process.png' %}>
         <div class="carousel-caption d-none d-md-block">
-        <h5 class="large-txt">{% trans 'Import Historian Variables' %}</h5>
-        <p class="medium-txt">{% trans 'Transfer variables data from historian OPCUA servers into BioPy.' %}</p>
+        <h5 class="large-txt">{% trans 'Single Process Dataframes' %}</h5>
+        <p class="medium-txt">{% trans 'Create single process modelling dataframes in BioPy.' %}</p>
         </div>
       </a>
     </div>
     <div class="carousel-item">
-      <a href="{% url 'historian_events' %}">
-        <img class="d-block m-auto" src={% static 'images/events.png' %}>
+      <a href="{% url 'mp_df' %}">
+        <img class="d-block m-auto" src={% static 'images/multi_process.png' %}>
         <div class="carousel-caption d-none d-md-block">
-        <h5 class="large-txt">{% trans 'Import Historian Events' %}</h5>
-        <p class="medium-txt">{% trans 'Transfer events data from historian OPCUA servers into BioPy.' %}</p>
-        </div>
-      </a>
-    </div>
-    <div class="carousel-item">
-      <a href="{% url 'historian_classes' %}">
-        <img class="d-block m-auto" src={% static 'images/classes.png' %}>
-        <div class="carousel-caption d-none d-md-block">
-        <h5 class="large-txt">{% trans 'Import Historian Classes' %}</h5>
-        <p class="medium-txt">{% trans 'Transfer classification data from historian OPCUA servers into BioPy.' %}</p>
+        <h5 class="large-txt">{% trans 'Multi Process Dataframes' %}</h5>
+        <p class="medium-txt">{% trans 'Create multi-process modelling dataframes in BioPy.' %}</p>
         </div>
       </a>
     </div>

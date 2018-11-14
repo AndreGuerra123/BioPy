@@ -1,15 +1,17 @@
-import os
 import tempfile
+import os
 from builtins import getattr
 from datetime import datetime
 
-from BioPyApp.forms import connection, historian, structure
+import numpy as np
+import pandas as pd
+from BioPyApp.forms import connection, dataframe, historian, structure
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.views import SuccessMessageMixin
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
@@ -19,8 +21,6 @@ from django.utils.html import escape, escapejs
 from django.utils.translation import gettext as _
 from django.views import generic
 from django_addanother.views import CreatePopupMixin, UpdatePopupMixin
-from BioPyApp.widgets import DeletePopupMixin
-
 from formtools.wizard.views import SessionWizardView
 from import_export.formats.base_formats import DEFAULT_FORMATS
 from import_export.forms import ConfirmImportForm, ExportForm, ImportForm
@@ -28,7 +28,10 @@ from import_export.resources import RowResult, modelresource_factory
 from import_export.tmp_storages import TempFolderStorage
 from rest_framework import generics
 from rest_framework.generics import CreateAPIView
+from rest_framework.reverse import reverse_lazy
 
+from BioPyApp.mixins import DataframeDownload, SingleProcessDataframeFormView, \
+    SingleProcessDataframeMixin, HistorianImporterFormView
 from BioPyApp.models import Batch, Class, Endpoint, Event, Node, Process, \
     Variable
 from BioPyApp.permissions import hasBatchPermission, hasDataPermission, \
@@ -37,11 +40,11 @@ from BioPyApp.resources import ClassResource, EventResource, VariableResource
 from BioPyApp.serializers import BatchSerializer, ClassSerializer, \
     EndpointSerializer, EventSerializer, NodeSerializer, ProcessSerializer, \
     VariableSerializer
-from newsletter.compat import get_context
+from BioPyApp.widgets import DeletePopupMixin
 
+from BioPyApp.drivers.opcua import OPCUAHistorianImporter
 
 # Universal
-
 @method_decorator(login_required, name='dispatch')
 class HomeView(generic.TemplateView):
     template_name = 'home.html'
@@ -69,59 +72,45 @@ class InputView(generic.TemplateView):
     template_name = 'actions/input/input.html'
 
 ### Realtime
-
-### Historian 
+### Historian Importer
 @method_decorator(login_required,name="dispatch")
-class HistorianWizardView(SessionWizardView):
+class HistorianImporterView(generic.TemplateView):
+    template_name = "actions/input/historian/historian.html"
+
+@method_decorator(login_required,name="dispatch")
+class VariableHistorianImporterView(HistorianImporterFormView):
+    model = Variable
     form_list = [
         ("step_one", structure.SelectProcessForm),
         ("step_two", structure.SelectBatchForm),
         ("step_three", historian.StartEndForm),
         ("step_four", connection.SelectMultipleEndpointsForm),
-        ("step_five", connection.SelectMultipleNodesForm),
+        ("step_five", connection.SelectMultipleVariableNodesForm),
         ]
 
-    template_name = "actions/input/historian/historian.html"
+@method_decorator(login_required,name="dispatch")
+class EventHistorianImporterView(HistorianImporterFormView):
+    model = Event
+    form_list = [
+        ("step_one", structure.SelectProcessForm),
+        ("step_two", structure.SelectBatchForm),
+        ("step_three", historian.StartEndForm),
+        ("step_four", connection.SelectMultipleEndpointsForm),
+        ("step_five", connection.SelectMultipleEventNodesForm),
+        ]
 
-    def get_form_kwargs(self, step):
-        if step == 'step_one': #selects process
-            return {'user': self.request.user}
-        elif step == 'step_two' : # selects batch
-            return {'process':self.get_cleaned_data_for_step('step_one').get('process')}
-        elif step == 'step_three': # selects limits
-            return {'batch':self.get_cleaned_data_for_step('step_two').get('batch')}
-        elif step == 'step_four': # selects endpoints
-            return {'user':self.request.user}
-        elif step == 'step_five': # selectes nodes
-            return {'endpoints':self.get_cleaned_data_for_step('step_four').get('endpoints')}
-        else:
-            return {}
-    
-    def done(self,form_list,**kwargs):
-        context={}
-        template = 'actions/input/historian/historian_importer.html'
-        params=[form.cleaned_data for form in form_list]
-        results=HistorianImporter(params)
-        context['results'] = results
-        return TemplateResponse(self.request, [template], context)
+@method_decorator(login_required,name="dispatch")
+class ClassHistorianImporterView(HistorianImporterFormView):
+    model = Class
+    form_list = [
+        ("step_one", structure.SelectProcessForm),
+        ("step_two", structure.SelectBatchForm),
+        ("step_three", historian.StartEndForm),
+        ("step_four", connection.SelectMultipleEndpointsForm),
+        ("step_five", connection.SelectMultipleClassNodesForm),
+        ]
+ 
 
-
-@login_required
-def historian_processor(request,datasets):
-    
-    variables_dataset = datasets.getattr('variables',None)
-    classes_dataset = datasets.getattr('classes',None)
-    events_dataset = datasets.getattr('events',None)
-
-    if variables_dataset:
-        VariableResource(request.user).import_data(dataset=variables_dataset,dry_run=False,raise_errors=True,user=request.user)
-    if classes_dataset:
-        ClassResource(request.user).import_data(dataset=classes_dataset,dry_run=False,raise_errors=True,user=request.user)
-    if events_dataset:
-        EventResource(request.user).import_data(dataset=events_dataset,dry_run=False,raise_errors=True,user=request.user)
-
-    return HttpResponseRedirect(reverse('home'))
-    
 ### Import Files
 @method_decorator(login_required,name='dispatch')
 class ImportView(generic.TemplateView):
@@ -341,11 +330,74 @@ class EventFileExport(generic.View):
             EventResource(self.request.user),
             'actions/output/export/event_file_export.html')
 
-### Dataset
+### Dataframes
 @method_decorator(login_required,name='dispatch')
-class DatasetView(generic.TemplateView):
-    template_name = 'actions/output/dataset/dataset.html'
-#TODO: All types
+class DataframeView(generic.TemplateView):
+    template_name = 'actions/output/dataframe/dataframe.html'
+
+#### Single Process
+@method_decorator(login_required,name='dispatch')
+class SingleProcessDataframeView(generic.TemplateView):
+    template_name = 'actions/output/dataframe/single/single.html'
+
+@method_decorator(login_required,name='dispatch')
+class VariableSingleProcessDataframeView(SingleProcessDataframeFormView):
+    model = Variable
+    form_list=[
+        ("step_one", structure.SelectProcessForm),
+        ("step_two", structure.SelectMultipleBatchesForm),
+        ("step_three", dataframe.SelectVariablePredictorsForm),
+        ("step_four", dataframe.SelectSingleProcessDataframeOptionsForm),
+        ]
+    download_url_name = 'd_v_sp_df'
+
+@method_decorator(login_required,name='dispatch')
+class VariableSingleProcessDataframeDownloadView(DataframeDownload,SingleProcessDataframeMixin):
+    model = Variable
+
+@method_decorator(login_required,name='dispatch')
+class EventSingleProcessDataframeView(SingleProcessDataframeFormView):
+    model = Event
+    form_list=[
+        ("step_one", structure.SelectProcessForm),
+        ("step_two", structure.SelectMultipleBatchesForm),
+        ("step_three", dataframe.SelectEventPredictorsForm),
+        ("step_four", dataframe.SelectSingleProcessDataframeOptionsForm),
+        ]
+    download_url_name = 'd_e_sp_df'
+
+@method_decorator(login_required,name='dispatch')
+class EventSingleProcessDataframeDownloadView(DataframeDownload,SingleProcessDataframeMixin):
+    model = Event
+
+@method_decorator(login_required,name='dispatch')
+class ClassSingleProcessDataframeView(SingleProcessDataframeFormView):
+    model = Class
+    form_list=[
+        ("step_one", structure.SelectProcessForm),
+        ("step_two", structure.SelectMultipleBatchesForm),
+        ("step_three", dataframe.SelectClassPredictorsForm),
+        ("step_four", dataframe.SelectSingleProcessDataframeOptionsForm),
+        ]
+    download_url_name = 'd_c_sp_df'
+
+@method_decorator(login_required,name='dispatch')
+class ClassSingleProcessDataframeDownloadView(DataframeDownload,SingleProcessDataframeMixin):
+    model = Class
+    
+#### Multi Process
+class MultiProcessDataframeView(generic.TemplateView):
+    template_name = 'actions/output/dataframe/multi/multi.html'
+
+class VariableMultiProcessDataframeView(generic.FormView):
+    pass
+
+class EventMultiProcessDataframeView(generic.FormView):
+    pass
+
+class ClassMultiProcessDataframeView(generic.FormView):
+    pass
+
 
 ### Export Files
 @method_decorator(login_required,name='dispatch')

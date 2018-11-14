@@ -106,9 +106,12 @@ INSTALLED_APPS = [
     'import_export',
     'formtools',
     'bootstrap_datepicker_plus',
-    'django_addanother'
+    'django_addanother',
+    'computed_property'
 
 ]
+
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

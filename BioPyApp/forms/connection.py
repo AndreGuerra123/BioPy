@@ -18,8 +18,7 @@ class SelectEndpointForm(forms.Form):
             ,reverse_lazy('create_endpoint')
             ,reverse_lazy('update_endpoint',args=['__fk__'])
             ,reverse_lazy('delete_endpoint',args=['__fk__']))
-      
-    
+        
 class SelectNodeForm(forms.Form):
     node = ModelChoiceField(queryset=None)
     def __init__(self, *args, **kwargs):
@@ -31,9 +30,7 @@ class SelectNodeForm(forms.Form):
             ,reverse_lazy('create_node')
             ,reverse_lazy('update_node',args=['__fk__'])
             ,reverse_lazy('delete_node',args=['__fk__']))
-
-
-
+            
 class SelectMultipleEndpointsForm(forms.Form):
     endpoints = ModelMultipleChoiceField(queryset=None)
     
@@ -54,6 +51,45 @@ class SelectMultipleNodesForm(forms.Form):
         endpoints = kwargs.pop('endpoints')
         super(SelectMultipleNodesForm,self).__init__(*args, **kwargs)
         self.fields['nodes'].queryset = Node.objects.filter(endpoint__in=endpoints)
+        self.fields['nodes'].widget = CRUDWidgetWrapper(
+            self.fields['nodes'].widget
+            ,reverse_lazy('create_node')
+            ,reverse_lazy('update_node',args=['__fk__'])
+            ,reverse_lazy('delete_node',args=['__fk__']))
+
+class SelectMultipleVariableNodesForm(forms.Form):
+    nodes = ModelMultipleChoiceField(queryset=None)
+
+    def __init__(self, *args, **kwargs):
+        endpoints = kwargs.pop('endpoints')
+        super().__init__(*args, **kwargs)
+        self.fields['nodes'].queryset = Node.objects.filter(endpoint__in=endpoints,type="variable")
+        self.fields['nodes'].widget = CRUDWidgetWrapper(
+            self.fields['nodes'].widget
+            ,reverse_lazy('create_node')
+            ,reverse_lazy('update_node',args=['__fk__'])
+            ,reverse_lazy('delete_node',args=['__fk__']))
+
+class SelectMultipleEventNodesForm(forms.Form):
+    nodes = ModelMultipleChoiceField(queryset=None)
+
+    def __init__(self, *args, **kwargs):
+        endpoints = kwargs.pop('endpoints')
+        super().__init__(*args, **kwargs)
+        self.fields['nodes'].queryset = Node.objects.filter(endpoint__in=endpoints,type="event")
+        self.fields['nodes'].widget = CRUDWidgetWrapper(
+            self.fields['nodes'].widget
+            ,reverse_lazy('create_node')
+            ,reverse_lazy('update_node',args=['__fk__'])
+            ,reverse_lazy('delete_node',args=['__fk__']))
+
+class SelectMultipleClassNodesForm(forms.Form):
+    nodes = ModelMultipleChoiceField(queryset=None)
+
+    def __init__(self, *args, **kwargs):
+        endpoints = kwargs.pop('endpoints')
+        super().__init__(*args, **kwargs)
+        self.fields['nodes'].queryset = Node.objects.filter(endpoint__in=endpoints,type="class")
         self.fields['nodes'].widget = CRUDWidgetWrapper(
             self.fields['nodes'].widget
             ,reverse_lazy('create_node')
