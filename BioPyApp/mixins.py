@@ -10,7 +10,7 @@ from formtools.wizard.views import SessionWizardView
 
 from BioPyApp.forms import structure, dataframe
 from BioPyApp.drivers.dataframe import get_model_dataframe
-from BioPyApp.drivers.opcua import OPCUAHistorianImporter
+from BioPyApp.drivers.historian import OPCUAHistorianImporter
 
 class DataframeDownload(VirtualDownloadView):
 

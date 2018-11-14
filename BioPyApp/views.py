@@ -42,7 +42,7 @@ from BioPyApp.serializers import BatchSerializer, ClassSerializer, \
     VariableSerializer
 from BioPyApp.widgets import DeletePopupMixin
 
-from BioPyApp.drivers.opcua import OPCUAHistorianImporter
+from BioPyApp.drivers.historian import OPCUAHistorianImporter
 
 # Universal
 @method_decorator(login_required, name='dispatch')

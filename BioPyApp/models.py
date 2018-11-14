@@ -10,6 +10,11 @@ from django.db import models
 from django.forms.models import InlineForeignKeyField
 from django_pandas.managers import DataFrameManager
 from BioPyApp.common import minNum, maxNum, deltaEpoch
+from BioPyApp.drivers.client import EndpointClient
+
+
+TYPES=[("variable","Variable"),("class","Classifier"),("event","Event"),("spectrum","Spectrum")]
+
 
 class Endpoint(models.Model):
     POLICIES=[('Basic128Rsa15','Basic128Rsa15'),
@@ -30,7 +35,7 @@ class Endpoint(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     def get_client(self):
-        return OPCUAClient(self)
+        return EndpointClient(self)
         
     def get_unique_info(self,url):
         parsed = urlparse(url)
@@ -46,15 +51,11 @@ class Endpoint(models.Model):
             raise ValidationError({'url':['Security fields must all be null or filled together.',]})
 
         try:
-            client=OPCUAClient(self)
-            client.connect()
+            client=self.get_client()
         except Exception as e:
-            raise ValidationError({'url':['Could not establish initial connection. '+str(e),]})
+            raise ValidationError({'url':['Could not establish initial connection to server. '+str(e),]})
         finally:
-            try:
-                client.disconnect()
-            except:
-                pass
+            client.safe_disconnect()
                    
     def save(self, *args, **kwargs):
         self.validate()
@@ -64,7 +65,6 @@ class Endpoint(models.Model):
         return " : ".join([str(self.id), self.url, self.owner.username, self.modified.replace(microsecond=0).isoformat(' ')])
       
 class Node(models.Model):
-    TYPES=[("variable","Variable"),("class","Classifier"),("event","Event"),("spectrum","Spectrum")]
     endpoint = models.ForeignKey(to=Endpoint,on_delete=models.CASCADE)
     nodeid = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
@@ -75,12 +75,16 @@ class Node(models.Model):
     def validate(self):
         try:
             client = self.endpoint.get_client()
-            client.get_node(self.nodeid)
-            client.disconnect()
         except Exception as e:
-            raise ValidationError({'nodeid':['Could not establish initial connection. '+str(e),]})
+            raise ValidationError({'endpoint':['Could not establish initial connection to server. '+str(e),]})
+        try:
+            client.get_node(self.nodeid)
+        except:
+            raise ValidationError({'nodeid':['Could not establish initial connection to node. '+str(e),]})
+        finally:
+            client.safe_disconnect()
 
-                   
+       
     def save(self, *args, **kwargs):
         self.validate()
         super(Node, self).save(*args, **kwargs)
@@ -220,5 +224,3 @@ class Class(models.Model):
     def __str__(self):
         return " : ".join([str(self.id), self.batch.process.name, self.batch.name, self.name, self.value, self.modified.replace(microsecond=0).isoformat(' ')])
 
-#Anti circular dependency
-from BioPyApp.drivers.opcua import OPCUAClient
