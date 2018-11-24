@@ -60,7 +60,7 @@ class SingleProcessDataframeMixin(object):
         return get_model_dataframe(self.model,self.request.session['params'])
 
 class SingleProcessDataframeFormView(SessionWizardView):
-    template_name = "actions/output/dataframe/single/single_form.html"
+    template_name = "output/dataframe/single/single_form.html"
 
     def get_context_data(self,**kwargs): 
         context = super(SingleProcessDataframeFormView, self).get_context_data(**kwargs)
@@ -85,7 +85,7 @@ class SingleProcessDataframeFormView(SessionWizardView):
         return HttpResponseRedirect(reverse(self.download_url_name))
 
 class HistorianImporterFormView(SessionWizardView):
-    template_name = "actions/input/historian/historian_form.html"
+    template_name = "input/historian/historian_form.html"
 
     def get_form_kwargs(self, step):
         if step == 'step_one': #selects process
@@ -118,6 +118,6 @@ class HistorianImporterFormView(SessionWizardView):
         context['results'] = results
         context['model_name'] = self.model.__name__
 
-        template = 'actions/input/historian/historian_importer.html'
+        template = 'input/historian/historian_importer.html'
 
         return TemplateResponse(self.request, [template], context)

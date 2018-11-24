@@ -26,6 +26,7 @@ django-pandas = "*"
 django-downloadview = "*"
 feather-format = "*"
 django-computed-property = "*"
+tablib = "*"
 
 [dev-packages]
 pylint = "<2.0.0"

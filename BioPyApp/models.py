@@ -78,7 +78,7 @@ class Node(models.Model):
         except Exception as e:
             raise ValidationError({'endpoint':['Could not establish initial connection to server. '+str(e),]})
         try:
-            client.get_node(self.nodeid)
+           node = client.get_node(self.nodeid)
         except:
             raise ValidationError({'nodeid':['Could not establish initial connection to node. '+str(e),]})
         finally:

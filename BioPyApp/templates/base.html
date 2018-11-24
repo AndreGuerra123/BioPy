@@ -43,30 +43,28 @@
     <div class="wrapper">
         <!-- Sidebar Holder -->
         <nav id="sidebar">
-            <div class="sidebar-header">
-                <a class="h3"><img src="{% static "images/logo.png" %}" width="32" height="32"></img>BioPy</a>
+            <div class="glb-v">
+                <div style="margin:20%;text-align:center">
+                    <a class="h3"><img src="{% static "images/logo.png" %}" width="50" height="50"></img>BioPy</a>
+                </div>
             </div>
             <ul class="list-unstyled components">
             <li>
                 {% if user.is_authenticated %}
-                <a href="#actionsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><img src="{% static "images/logo.png" %}" width="30" height="30"></img>Actions</a>
-                <ul class="collapse list-unstyled" id="actionsSubmenu">
-                    <li>
-                       <a href="#inputSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Input</a>
+                
+                       <a href="#inputSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><img src="{% static "images/icons/input_icon.png"%}"></img>Input</a>
                         <ul class="collapse list-unstyled" id="inputSubmenu">
                             <li>
-                                <a href="/actions/input/realtime/">Real-time</a>
+                                <a href="{% url "realtime" %}">Real-time</a>
+                            </li>
+                            <li> 
+                                <a href="{% url "historian" %}">Historian</a>
                             </li>
                             <li>
-                                <a href="/actions/input/historian/">Historian</a>
-                            </li>
-                            <li>
-                                <a href="/actions/input/import/">Import Files</a>
+                                <a href="{% url "import" %}">Import Files</a>
                             </li>
                         </ul>
-                    </li>
-                    <li>
-                       <a href="#outputSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Output</a>
+                       <a href="#outputSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><img src="{% static "images/icons/output_icon.png"%}"></img>Output</a>
                         <ul class="collapse list-unstyled" id="outputSubmenu">
                         <li>
                             <a href="{% url 'df'%}">Dataframe</a>
@@ -75,20 +73,19 @@
                             <a href="{% url 'export'%}">Export Files</a>
                         </li>
                         </ul>
-                    </li>
-                    <li>
-                       <a href="#viewSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">View</a>
+                       <a href="#viewSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><img src="{% static "images/icons/view_icon.png"%}"></img>View</a>
                         <ul class="collapse list-unstyled" id="viewSubmenu">
                         <li>
-                            <a href="/actions/output/dataframe/">Dataframe</a>
+                            <a href="{% url "realtime_view" %}">Realtime Plot</a>
                         </li>
                         <li>
-                            <a href="/dataset/variables">Export Files</a>
+                            <a href="{% url "processes_view" %}">Processes Graph</a>
+                        </li>
+                        <li>
+                            <a href="{% url "batches_view" %}">Batch Plots</a>
                         </li>
                         </ul>
-                    </li>
-                    <li>
-                       <a href="#configureSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Configure</a>
+                       <a href="#configureSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><img src="{% static "images/icons/configure_icon.png"%}"></img>Configure</a>
                        <ul class="collapse list-unstyled" id="configureSubmenu">
                         <li>
                             <a href="{% url "configure_connections" %}">Connections</a>
@@ -97,9 +94,7 @@
                             <a href="{% url "configure_structure" %}">Structure</a>
                         </li>
                         </ul>
-                    </li>
-                </ul>
-                <a href="#apiSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">API</a>
+                       <a href="#apiSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><img src="{% static "images/icons/api_icon.png"%}"></img>API</a>
                 <ul class="collapse list-unstyled" id="apiSubmenu">
                     <li>
                        <a href="#realtimeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Real-time</a>
@@ -136,7 +131,7 @@
                         </ul>
                     </li>
                 </ul>
-                <a href="#accountSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Account</a>
+                <a href="#accountSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><img src="{% static "images/icons/account_icon.png"%}"></img>Account</a>
                 <ul class="collapse list-unstyled components" id="accountSubmenu">
                     <li>
                         <a href="{% url 'account_email'%}">Account Email</a>
@@ -150,9 +145,6 @@
                     <li>
                         <a href="{% url 'account_set_password'%}">Set Password</a>
                     </li>
-                   {% comment %}  <li>
-                        <a href="{% url 'soccialaccount_disconnect'%}">Disconnect</a>
-                    </li> {% endcomment %}
                     <li>
                         <a href="{% url 'account_logout'%}">Logout</a>
                     </li>

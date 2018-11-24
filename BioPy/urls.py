@@ -1,18 +1,3 @@
-"""BioPy URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/2.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import include, path
 
@@ -43,67 +28,67 @@ urlpatterns = [
     # Newletter
 
     path('newsletter/',include('newsletter.urls')),
-
-    # Actions
-    path('actions/',views.ActionsView.as_view(),name="actions"),
     
     ## Input
-    path('actions/input/',views.InputView.as_view(),name="input"),
+    path('input/',views.InputView.as_view(),name="input"),
 
     ### Real-time OPCUA
-    path('actions/input/realtime/',views.ImportView.as_view(),name="realtime"),
+    path('input/realtime/',views.ImportView.as_view(),name="realtime"),
 
     ### Historian OPCUA
-    path('actions/input/historian/',views.HistorianImporterView.as_view(),name="historian"),
-    path('actions/input/historian/variables/',views.VariableHistorianImporterView.as_view(),name="historian_variables"),
-    path('actions/input/historian/events/',views.EventHistorianImporterView.as_view(),name="historian_events"),
-    path('actions/input/historian/classes/',views.ClassHistorianImporterView.as_view(),name="historian_classes"),
+    path('input/historian/',views.HistorianImporterView.as_view(),name="historian"),
+    path('input/historian/variables/',views.VariableHistorianImporterView.as_view(),name="historian_variables"),
+    path('input/historian/events/',views.EventHistorianImporterView.as_view(),name="historian_events"),
+    path('input/historian/classes/',views.ClassHistorianImporterView.as_view(),name="historian_classes"),
 
     ### Import Files
-    path('actions/input/import/',views.ImportView.as_view(),name="import"),
-    path('actions/input/import/variables/', views.VariableFileImport.as_view(),name="import_variables"),
-    path('actions/input/import/variables/processing/', views.VariableFileImportProcessing.as_view(),name="import_variables_processing"),
-    path('actions/input/import/events/', views.EventFileImport.as_view(),name="import_events"),
-    path('actions/input/import/events/processing/', views.EventFileImportProcessing.as_view(),name="import_events_processing"),
-    path('actions/input/import/classes/', views.ClassFileImport.as_view(),name="import_classes"),
-    path('actions/input/import/classes/processing/', views.ClassFileImportProcessing.as_view(),name="import_classes_processing"),
+    path('input/import/',views.ImportView.as_view(),name="import"),
+    path('input/import/variables/', views.VariableFileImport.as_view(),name="import_variables"),
+    path('input/import/variables/processing/', views.VariableFileImportProcessing.as_view(),name="import_variables_processing"),
+    path('input/import/events/', views.EventFileImport.as_view(),name="import_events"),
+    path('input/import/events/processing/', views.EventFileImportProcessing.as_view(),name="import_events_processing"),
+    path('input/import/classes/', views.ClassFileImport.as_view(),name="import_classes"),
+    path('input/import/classes/processing/', views.ClassFileImportProcessing.as_view(),name="import_classes_processing"),
 
     ## Output
-    path('actions/output/',views.OutputView.as_view(),name="output"),
+    path('output/',views.OutputView.as_view(),name="output"),
 
     ###Dataframes
-    path('actions/output/dataframe/',views.DataframeView.as_view(),name="df"),
+    path('output/dataframe/',views.DataframeView.as_view(),name="df"),
     
-    path('actions/output/dataframe/single/',views.SingleProcessDataframeView.as_view(),name="sp_df"),
+    path('output/dataframe/single/',views.SingleProcessDataframeView.as_view(),name="sp_df"),
     
-    path('actions/output/dataframe/single/variable/',views.VariableSingleProcessDataframeView.as_view(),name="v_sp_df"),
-    path('actions/output/dataframe/single/variable/download/',views.VariableSingleProcessDataframeDownloadView.as_view(),name="d_v_sp_df"),
+    path('output/dataframe/single/variable/',views.VariableSingleProcessDataframeView.as_view(),name="v_sp_df"),
+    path('output/dataframe/single/variable/download/',views.VariableSingleProcessDataframeDownloadView.as_view(),name="d_v_sp_df"),
     
-    path('actions/output/dataframe/single/event/',views.EventSingleProcessDataframeView.as_view(),name="e_sp_df"),
-    path('actions/output/dataframe/single/event/download/',views.EventSingleProcessDataframeDownloadView.as_view(),name="d_e_sp_df"),
+    path('output/dataframe/single/event/',views.EventSingleProcessDataframeView.as_view(),name="e_sp_df"),
+    path('output/dataframe/single/event/download/',views.EventSingleProcessDataframeDownloadView.as_view(),name="d_e_sp_df"),
 
-    path('actions/output/dataframe/single/variable/',views.ClassSingleProcessDataframeView.as_view(),name="c_sp_df"),
-    path('actions/output/dataframe/single/class/download/',views.ClassSingleProcessDataframeDownloadView.as_view(),name="d_c_sp_df"),
+    path('output/dataframe/single/variable/',views.ClassSingleProcessDataframeView.as_view(),name="c_sp_df"),
+    path('output/dataframe/single/class/download/',views.ClassSingleProcessDataframeDownloadView.as_view(),name="d_c_sp_df"),
 
-    path('actions/output/dataframe/multi/',views.MultiProcessDataframeView.as_view(),name="mp_df"),
+    path('output/dataframe/multi/',views.MultiProcessDataframeView.as_view(),name="mp_df"),
 
-    path('actions/output/dataframe/multi/variable/',views.VariableMultiProcessDataframeView.as_view(),name="v_mp_df"),
-    path('actions/output/dataframe/multi/event/',views.EventMultiProcessDataframeView.as_view(),name="e_mp_df"),
-    path('actions/output/dataframe/multi/class/',views.ClassMultiProcessDataframeView.as_view(),name="c_mp_df"),
+    path('output/dataframe/multi/variable/',views.VariableMultiProcessDataframeView.as_view(),name="v_mp_df"),
+    path('output/dataframe/multi/event/',views.EventMultiProcessDataframeView.as_view(),name="e_mp_df"),
+    path('output/dataframe/multi/class/',views.ClassMultiProcessDataframeView.as_view(),name="c_mp_df"),
 
     # ###Export data
-    path('actions/output/export/',views.ExportView.as_view(),name="export"),
-    path('actions/output/export/variables/', views.VariableFileExport.as_view(),name="export_variables"),
-    path('actions/output/export/events/', views.EventFileExport.as_view(),name="export_events"),
-    path('actions/output/export/classes/', views.ClassFileExport.as_view(),name="export_classes"),
+    path('output/export/',views.ExportView.as_view(),name="export"),
+    path('output/export/variables/', views.VariableFileExport.as_view(),name="export_variables"),
+    path('output/export/events/', views.EventFileExport.as_view(),name="export_events"),
+    path('output/export/classes/', views.ClassFileExport.as_view(),name="export_classes"),
     
     ## View
-    path('actions/view/',views.ViewView.as_view(),name="view"),
+    path('view/',views.ViewView.as_view(),name="view"),
+    path('view/realtime/',views.ViewView.as_view(),name="realtime_view"),
+    path('view/processes/',views.ViewView.as_view(),name="processes_view"),
+    path('view/batches/',views.ViewView.as_view(),name="batches_view"),
 
     ## Configure
-    path('actions/configure/',views.ConfigureView.as_view(),name="configure"),
-    path('actions/configure/connections',views.ConnectionsWizardView.as_view(),name="configure_connections"),
-    path('actions/configure/structure',views.StructureWizardView.as_view(),name="configure_structure"),
+    path('configure/',views.ConfigureView.as_view(),name="configure"),
+    path('configure/connections',views.ConnectionsWizardView.as_view(),name="configure_connections"),
+    path('configure/structure',views.StructureWizardView.as_view(),name="configure_structure"),
 
 
     # API

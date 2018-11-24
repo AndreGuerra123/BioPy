@@ -61,21 +61,16 @@ class AboutView(generic.TemplateView):
 class TermsView(generic.TemplateView):
     template_name = 'terms.html'
 
-# Actions
-@method_decorator(login_required,name='dispatch')
-class ActionsView(generic.TemplateView):
-    template_name = 'actions/actions.html'
-
 ## Input Data
 @method_decorator(login_required,name='dispatch')
 class InputView(generic.TemplateView):
-    template_name = 'actions/input/input.html'
+    template_name = 'input/input.html'
 
 ### Realtime
 ### Historian Importer
 @method_decorator(login_required,name="dispatch")
 class HistorianImporterView(generic.TemplateView):
-    template_name = "actions/input/historian/historian.html"
+    template_name = "input/historian/historian.html"
 
 @method_decorator(login_required,name="dispatch")
 class VariableHistorianImporterView(HistorianImporterFormView):
@@ -114,7 +109,7 @@ class ClassHistorianImporterView(HistorianImporterFormView):
 ### Import Files
 @method_decorator(login_required,name='dispatch')
 class ImportView(generic.TemplateView):
-    template_name = 'actions/input/import/import.html'
+    template_name = 'input/import/import.html'
 
 def importer(request,resource,template):
     '''
@@ -199,13 +194,13 @@ class VariableFileImport(generic.View):
         return importer(
             self.request,
             VariableResource(self.request.user),
-            'actions/input/import/variable_file_import.html')
+            'input/import/variable_file_import.html')
 
     def post(self,*args,**kwargs):
         return importer(
             self.request,
             VariableResource(self.request.user),
-            'actions/input/import/variable_file_import.html')
+            'input/import/variable_file_import.html')
 
 #### VariableFileProcessingImport
 @method_decorator(login_required,name='dispatch')
@@ -214,7 +209,7 @@ class VariableFileImportProcessing(generic.View):
         return processor(
             self.request,
             VariableResource(self.request.user),
-            'actions/input/import/variable_file_import.html',
+            'input/import/variable_file_import.html',
             'variables_list')    
         
 #### EventFileImport   
@@ -224,13 +219,13 @@ class EventFileImport(generic.TemplateView):
         return importer(
             self.request,
             EventResource(self.request.user),
-            'actions/input/import/event_file_import.html')
+            'input/import/event_file_import.html')
 
     def post(self,*args,**kwargs):
         return importer(
             self.request,
             EventResource(self.request.user),
-            'actions/input/import/event_file_import.html')
+            'input/import/event_file_import.html')
 
 #### EventFileProcessingImport
 @method_decorator(login_required,name='dispatch')
@@ -239,7 +234,7 @@ class EventFileImportProcessing(generic.View):
         return processor(
             self.request,
             EventResource(self.request.user),
-            'actions/input/import/event_file_import.html',
+            'input/import/event_file_import.html',
             'events_list')
 
 #### ClassFileImport   
@@ -249,13 +244,13 @@ class ClassFileImport(generic.View):
         return importer(
             self.request,
             ClassResource(self.request.user),
-            'actions/input/import/class_file_import.html')
+            'input/import/class_file_import.html')
 
     def post(self,*args,**kwargs):
         return importer(
             self.request,
             ClassResource(self.request.user),
-            'actions/input/import/class_file_import.html')
+            'input/import/class_file_import.html')
 
 #### ClassFileProcessingImport
 @method_decorator(login_required,name='dispatch')
@@ -264,13 +259,13 @@ class ClassFileImportProcessing(generic.View):
         return processor(
             self.request,
             ClassResource(self.request.user),
-            'actions/input/import/class_file_import.html',
+            'input/import/class_file_import.html',
             'classes_list')  
 
 ## Output Data
 @method_decorator(login_required,name='dispatch')
 class OutputView(generic.TemplateView):
-    template_name = 'actions/output/output.html'
+    template_name = 'output/output.html'
 
 def exporter(request,resource,template):
 
@@ -296,49 +291,49 @@ class VariableFileExport(generic.View):
     def get(self,*args, **kwargs):
         return exporter(self.request,
             VariableResource(self.request.user),
-            'actions/output/export/variable_file_export.html')
+            'output/export/variable_file_export.html')
 
     def post(self,*args,**kwargs):
         return exporter(
             self.request,
             VariableResource(self.request.user),
-            'actions/output/export/variable_file_export.html')
+            'output/export/variable_file_export.html')
 
 @method_decorator(login_required, name="dispatch") 
 class ClassFileExport(generic.View):
     def get(self,*args, **kwargs):
         return exporter(self.request,
             ClassResource(self.request.user),
-            'actions/output/export/class_file_export.html')
+            'output/export/class_file_export.html')
 
     def post(self,*args,**kwargs):
         return exporter(
             self.request,
             ClassResource(self.request.user),
-            'actions/output/export/class_file_export.html')
+            'output/export/class_file_export.html')
 
 @method_decorator(login_required, name="dispatch") 
 class EventFileExport(generic.View):
     def get(self,*args, **kwargs):
         return exporter(self.request,
             EventResource(self.request.user),
-            'actions/output/export/event_file_export.html')
+            'output/export/event_file_export.html')
 
     def post(self,*args,**kwargs):
         return exporter(
             self.request,
             EventResource(self.request.user),
-            'actions/output/export/event_file_export.html')
+            'output/export/event_file_export.html')
 
 ### Dataframes
 @method_decorator(login_required,name='dispatch')
 class DataframeView(generic.TemplateView):
-    template_name = 'actions/output/dataframe/dataframe.html'
+    template_name = 'output/dataframe/dataframe.html'
 
 #### Single Process
 @method_decorator(login_required,name='dispatch')
 class SingleProcessDataframeView(generic.TemplateView):
-    template_name = 'actions/output/dataframe/single/single.html'
+    template_name = 'output/dataframe/single/single.html'
 
 @method_decorator(login_required,name='dispatch')
 class VariableSingleProcessDataframeView(SingleProcessDataframeFormView):
@@ -387,7 +382,7 @@ class ClassSingleProcessDataframeDownloadView(DataframeDownload,SingleProcessDat
     
 #### Multi Process
 class MultiProcessDataframeView(generic.TemplateView):
-    template_name = 'actions/output/dataframe/multi/multi.html'
+    template_name = 'output/dataframe/multi/multi.html'
 
 class VariableMultiProcessDataframeView(generic.FormView):
     pass
@@ -402,17 +397,17 @@ class ClassMultiProcessDataframeView(generic.FormView):
 ### Export Files
 @method_decorator(login_required,name='dispatch')
 class ExportView(generic.TemplateView):
-    template_name = 'actions/output/export/export.html'
+    template_name = 'output/export/export.html'
 
 ## View
 @method_decorator(login_required,name='dispatch')
 class ViewView(generic.TemplateView):
-    template_name = 'actions/view/view.html'
+    template_name = 'view/view.html'
 
 ## Configure
 @method_decorator(login_required,name='dispatch')
 class ConfigureView(generic.TemplateView):
-    template_name = 'actions/configure/configure.html'
+    template_name = 'configure/configure.html'
 
 ### Connections
 @method_decorator(login_required,name='dispatch')
@@ -422,7 +417,7 @@ class ConnectionsWizardView(SessionWizardView):
         ("step_two", connection.SelectNodeForm),
         ]
 
-    template_name = "actions/configure/connections/connections.html"
+    template_name = "configure/connections/connections.html"
 
     def get_form_kwargs(self, step):
         if step == 'step_one': #inputs user
@@ -444,7 +439,7 @@ class StructureWizardView(SessionWizardView):
         ("step_three", structure.DataConfigurationForm)
         ]
 
-    template_name = "actions/configure/structure/structure.html"
+    template_name = "configure/structure/structure.html"
 
     def get_form_kwargs(self, step):
         if step == 'step_one': #inputs user

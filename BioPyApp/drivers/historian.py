@@ -1,5 +1,6 @@
 from BioPyApp.resources import ClassResource, EventResource, VariableResource
 from BioPyApp.models import Variable, Event, Class
+import tablib
 
 
 def OPCUAHistorianReader(params):
@@ -8,22 +9,23 @@ def OPCUAHistorianReader(params):
     endpoints = params['endpoints']
     nodes = params['nodes']
 
-    rows={}
+    hist_list=[]
     for endpoint in endpoints:
         client=endpoint.get_client()
         for node in nodes:
             if node.endpoint == endpoint:
-                rows += client.get_node(node.nodeid).read_raw_history(start,end)
+                hist_list += client.get_node(node.nodeid).read_raw_history(start,end)
         client.disconnect()
-    return rows
+    return hist_list
 
 def OPCUAVariableHistorianDataset(params):
-    rows = OPCUAHistorianReader(params)
-
-    #dataset must have process, batch, name, value, timestamp...everything else is acessory.
-    print(rows)
-    
-    return rows
+    hist_list = OPCUAHistorianReader(params)
+    print(hist_list)
+    data = tablib.Dataset()
+    data.headers = ('process', 'batch','name','timestamp','value')
+    for row in hist_list():
+        data.append((params['process'],params['batch'],node.name,node.timestamp,node.value))   
+    return data
     
 def OPCUAHistorianImporter(user,model,params):
     if(model == Variable):
