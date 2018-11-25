@@ -40,7 +40,7 @@ class VariableResource(ProcessBatchResource):
         model = Variable
         skip_unchanged = True
         report_skipped = True
-        exclude = ('id','created','modified')
+        exclude = ('id','created','modified','elapsed')
         import_id_fields = ('batch','name','timestamp') 
         export_order = ('timestamp','process','batch','name','value')
 
@@ -56,7 +56,7 @@ class EventResource(ProcessBatchResource):
         model = Event
         skip_unchanged = True
         report_skipped = True
-        exclude = ('id','created','modified')
+        exclude = ('id','created','modified','elapsed')
         import_id_fields = ('batch','name','timestamp') 
         export_order = ('timestamp','process','batch','name')
 

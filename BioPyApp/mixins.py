@@ -10,7 +10,10 @@ from formtools.wizard.views import SessionWizardView
 
 from BioPyApp.forms import structure, dataframe
 from BioPyApp.drivers.dataframe import get_model_dataframe
-from BioPyApp.drivers.historian import OPCUAHistorianImporter
+from BioPyApp.drivers.historian import OPCUAVariableHistorianImporter, OPCUAEventHistorianImporter, OPCUAClassHistorianImporter
+
+from django.template.response import TemplateResponse
+
 
 class DataframeDownload(VirtualDownloadView):
 
@@ -106,18 +109,38 @@ class HistorianImporterFormView(SessionWizardView):
         context['model_name']=self.model.__name__
         return context
 
-    def done(self,form_list,**kwargs):
+class VariableHistorianImporterFormView(HistorianImporterFormView):
 
+    def done(self,form_list,**kwargs):
         params={}
         for form in form_list:
             params.update(form.cleaned_data)
-
-        results=OPCUAHistorianImporter(self.request.user,self.model,params)        
-        
         context={}
-        context['results'] = results
+        context['result'] = OPCUAVariableHistorianImporter(self.request.user,params)
         context['model_name'] = self.model.__name__
-
         template = 'input/historian/historian_importer.html'
+        return TemplateResponse(self.request, [template], context)
 
+class ClassHistorianImporterFormView(HistorianImporterFormView):
+
+    def done(self,form_list,**kwargs):
+        params={}
+        for form in form_list:
+            params.update(form.cleaned_data)
+        context={}
+        context['result'] = OPCUAClassHistorianImporter(self.request.user,params)
+        context['model_name'] = self.model.__name__
+        template = 'input/historian/historian_importer.html'
+        return TemplateResponse(self.request, [template], context)
+
+class EventHistorianImporterFormView(HistorianImporterFormView):
+
+    def done(self,form_list,**kwargs):
+        params={}
+        for form in form_list:
+            params.update(form.cleaned_data)
+        context={}
+        context['result'] = OPCUAEventHistorianImporter(self.request.user,params)
+        context['model_name'] = self.model.__name__
+        template = 'input/historian/historian_importer.html'
         return TemplateResponse(self.request, [template], context)

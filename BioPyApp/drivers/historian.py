@@ -1,51 +1,73 @@
+import tablib
+from datetime import timezone
 from BioPyApp.resources import ClassResource, EventResource, VariableResource
 from BioPyApp.models import Variable, Event, Class
-import tablib
 
+def OPCUAVariableHistorianImporter(user,params):
+    process=params['process']
+    batch=params['batch']
+    start = params['start']
+    end = params['end']
+    endpoints = params['endpoints']
+    nodes = params['nodes']
+    dataset = tablib.Dataset()
+    dataset.headers = ('id','process','batch','name','timestamp','value')
 
-def OPCUAHistorianReader(params):
+    for endpoint in endpoints:
+        client=endpoint.get_client()
+
+        for node in nodes:
+            if node.endpoint == endpoint:
+                hist = client.get_node(node.nodeid).read_raw_history(start,end)
+                for row in hist:
+                    dataset.append("",process.name,batch.name,node.name,row.SourceTimestamp.replace(tzinfo=timezone.utc),float(row.Value.Value))
+        client.disconnect()
+
+    return VariableResource(user).import_data(dataset,dry_run=True,raise_errors=False,user=user)
+    
+def OPCUAEventHistorianImporter(user,params):
+    process=params['process']
+    batch=params['batch']
     start = params['start']
     end = params['end']
     endpoints = params['endpoints']
     nodes = params['nodes']
 
-    hist_list=[]
+    dataset = tablib.Dataset()
+    dataset.headers = ('id','process','batch','name','timestamp','value')
+
     for endpoint in endpoints:
         client=endpoint.get_client()
+
         for node in nodes:
             if node.endpoint == endpoint:
-                hist_list += client.get_node(node.nodeid).read_raw_history(start,end)
+                hist = client.get_node(node.nodeid).read_raw_history(start,end)
+                for row in hist:
+                    dataset.append((None,process.name,batch.name,node.name,row.SourceTimestamp.replace(tzinfo=timezone.utc),float(row.Value.Value)))
         client.disconnect()
-    return hist_list
 
-def OPCUAVariableHistorianDataset(params):
-    hist_list = OPCUAHistorianReader(params)
-    print(hist_list)
-    data = tablib.Dataset()
-    data.headers = ('process', 'batch','name','timestamp','value')
-    for row in hist_list():
-        data.append((params['process'],params['batch'],node.name,node.timestamp,node.value))   
-    return data
+    return VariableResource(user).import_data(dataset,dry_run=True,raise_errors=False,user=user)
+
+
+def OPCUAClassHistorianImporter(user,params):
+    process=params['process']
+    batch=params['batch']
+    start = params['start']
+    end = params['end']
+    endpoints = params['endpoints']
+    nodes = params['nodes']
     
-def OPCUAHistorianImporter(user,model,params):
-    if(model == Variable):
-        return VariableResource(user).import_data(
-                                          OPCUAVariableHistorianDataset(params),
-                                          dry_run=True,
-                                          raise_errors=False,
-                                          user=user)
-    elif(model == Event):
-        return EventResource(user).import_data(
-                                          OPCUAEventHistorianDataset(params),
-                                          dry_run=True,
-                                          raise_errors=False,
-                                          user=user)
-    elif(model == Class):
-        return ClassResource(user).import_data(
-                                          OPCUAClassHistorianDataset(params),
-                                          dry_run=True,
-                                          raise_errors=False,
-                                          user=user)
-    else:
-        raise ValueError(str(model) + " is not a valid historian model.")
+    dataset = tablib.Dataset()
+    dataset.headers = ('id','process','batch','name','value')
 
+    for endpoint in endpoints:
+        client=endpoint.get_client()
+
+        for node in nodes:
+            if node.endpoint == endpoint:
+                hist = client.get_node(node.nodeid).read_raw_history(start,end)
+                for row in hist:
+                    dataset.append((None,process.name,batch.name,node.name,str(row.Value.Value)))
+        client.disconnect()
+
+    return ClassResource(user).import_data(dataset,dry_run=True,raise_errors=False,user=user)

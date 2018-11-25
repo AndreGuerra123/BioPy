@@ -11,7 +11,7 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.views import SuccessMessageMixin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
@@ -41,8 +41,8 @@ from BioPyApp.serializers import BatchSerializer, ClassSerializer, \
     EndpointSerializer, EventSerializer, NodeSerializer, ProcessSerializer, \
     VariableSerializer
 from BioPyApp.widgets import DeletePopupMixin
+from BioPyApp.mixins import VariableHistorianImporterFormView, ClassHistorianImporterFormView, EventHistorianImporterFormView
 
-from BioPyApp.drivers.historian import OPCUAHistorianImporter
 
 # Universal
 @method_decorator(login_required, name='dispatch')
@@ -73,7 +73,7 @@ class HistorianImporterView(generic.TemplateView):
     template_name = "input/historian/historian.html"
 
 @method_decorator(login_required,name="dispatch")
-class VariableHistorianImporterView(HistorianImporterFormView):
+class VariableHistorianImporterView(VariableHistorianImporterFormView):
     model = Variable
     form_list = [
         ("step_one", structure.SelectProcessForm),
@@ -84,7 +84,7 @@ class VariableHistorianImporterView(HistorianImporterFormView):
         ]
 
 @method_decorator(login_required,name="dispatch")
-class EventHistorianImporterView(HistorianImporterFormView):
+class EventHistorianImporterView(EventHistorianImporterFormView):
     model = Event
     form_list = [
         ("step_one", structure.SelectProcessForm),
@@ -95,7 +95,7 @@ class EventHistorianImporterView(HistorianImporterFormView):
         ]
 
 @method_decorator(login_required,name="dispatch")
-class ClassHistorianImporterView(HistorianImporterFormView):
+class ClassHistorianImporterView(ClassHistorianImporterFormView):
     model = Class
     form_list = [
         ("step_one", structure.SelectProcessForm),
