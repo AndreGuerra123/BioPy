@@ -3,7 +3,7 @@ from datetime import timezone
 from BioPyApp.resources import ClassResource, EventResource, VariableResource
 from BioPyApp.models import Variable, Event, Class
 
-def OPCUAVariableHistorianImporter(user,params):
+def OPCUAVariableHistorianDataset(params):
     process=params['process']
     batch=params['batch']
     start = params['start']
@@ -11,21 +11,19 @@ def OPCUAVariableHistorianImporter(user,params):
     endpoints = params['endpoints']
     nodes = params['nodes']
     dataset = tablib.Dataset()
-    dataset.headers = ('id','process','batch','name','timestamp','value')
+    dataset.headers = ('timestamp','process','batch','name','value')
 
     for endpoint in endpoints:
         client=endpoint.get_client()
-
         for node in nodes:
             if node.endpoint == endpoint:
                 hist = client.get_node(node.nodeid).read_raw_history(start,end)
                 for row in hist:
-                    dataset.append("",process.name,batch.name,node.name,row.SourceTimestamp.replace(tzinfo=timezone.utc),float(row.Value.Value))
+                    dataset.append([row.SourceTimestamp.replace(tzinfo=timezone.utc),process.name,batch.name,node.name,float(row.Value.Value)])
         client.disconnect()
-
-    return VariableResource(user).import_data(dataset,dry_run=True,raise_errors=False,user=user)
+    return dataset
     
-def OPCUAEventHistorianImporter(user,params):
+def OPCUAEventHistorianDataset(params):
     process=params['process']
     batch=params['batch']
     start = params['start']
@@ -38,7 +36,6 @@ def OPCUAEventHistorianImporter(user,params):
 
     for endpoint in endpoints:
         client=endpoint.get_client()
-
         for node in nodes:
             if node.endpoint == endpoint:
                 hist = client.get_node(node.nodeid).read_raw_history(start,end)
@@ -46,10 +43,10 @@ def OPCUAEventHistorianImporter(user,params):
                     dataset.append((None,process.name,batch.name,node.name,row.SourceTimestamp.replace(tzinfo=timezone.utc),float(row.Value.Value)))
         client.disconnect()
 
-    return VariableResource(user).import_data(dataset,dry_run=True,raise_errors=False,user=user)
+    return dataset
 
 
-def OPCUAClassHistorianImporter(user,params):
+def OPCUAClassHistorianDataset(params):
     process=params['process']
     batch=params['batch']
     start = params['start']
@@ -62,7 +59,6 @@ def OPCUAClassHistorianImporter(user,params):
 
     for endpoint in endpoints:
         client=endpoint.get_client()
-
         for node in nodes:
             if node.endpoint == endpoint:
                 hist = client.get_node(node.nodeid).read_raw_history(start,end)
@@ -70,4 +66,4 @@ def OPCUAClassHistorianImporter(user,params):
                     dataset.append((None,process.name,batch.name,node.name,str(row.Value.Value)))
         client.disconnect()
 
-    return ClassResource(user).import_data(dataset,dry_run=True,raise_errors=False,user=user)
+    return dataset

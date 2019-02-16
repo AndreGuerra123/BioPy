@@ -22,7 +22,7 @@ from django.utils.translation import gettext as _
 from django.views import generic
 from django_addanother.views import CreatePopupMixin, UpdatePopupMixin
 from formtools.wizard.views import SessionWizardView
-from import_export.formats.base_formats import DEFAULT_FORMATS
+from import_export.formats.base_formats import DEFAULT_FORMATS, JSON
 from import_export.forms import ConfirmImportForm, ExportForm, ImportForm
 from import_export.resources import RowResult, modelresource_factory
 from import_export.tmp_storages import TempFolderStorage
@@ -41,8 +41,8 @@ from BioPyApp.serializers import BatchSerializer, ClassSerializer, \
     EndpointSerializer, EventSerializer, NodeSerializer, ProcessSerializer, \
     VariableSerializer
 from BioPyApp.widgets import DeletePopupMixin
-from BioPyApp.mixins import VariableHistorianImporterFormView, ClassHistorianImporterFormView, EventHistorianImporterFormView
-
+from BioPyApp.mixins import HistorianImporterFormView
+from BioPyApp.drivers.historian import OPCUAVariableHistorianDataset
 
 # Universal
 @method_decorator(login_required, name='dispatch')
@@ -67,13 +67,49 @@ class InputView(generic.TemplateView):
     template_name = 'input/input.html'
 
 ### Realtime
+
+
 ### Historian Importer
+def historian_importer(request,resource,dataset,template):
+    context = {}
+    if request.POST:
+        result = resource.import_data(dataset, dry_run=True,raise_errors=False,file_name=tmp_storage.name,user=request.user)
+        context['result'] = result
+        if not result.has_errors():
+            tmp_storage = TempFolderStorage()
+            input_format=JSON
+            tmp_storage.save(dataset.export('json').encode(),input_format.get_read_mode)
+            context['confirm_form'] = ConfirmImportForm(initial={
+            'import_file_name': tmp_storage.name,
+            'original_file_name': tmp_storage.name,
+            'input_format':input_format
+            })
+
+    context['fields'] = [f.column_name for f in resource.get_user_visible_fields()]
+    return TemplateResponse(request, [template],context)
+
+def historian_processor(request,resource,redirect_url):
+
+    confirm_form = ConfirmImportForm(request.POST)
+    if confirm_form.is_valid():
+        input_format = JSON
+        tmp_storage = TempFolderStorage(name=confirm_form.cleaned_data['import_file_name'])
+        data = tmp_storage.read(input_format.get_read_mode())
+        dataset = input_format.create_dataset(data)
+        resource.import_data(dataset,
+                                    dry_run=False,
+                                    raise_errors=True,
+                                    file_name=confirm_form.cleaned_data['original_file_name'],
+                                    user=request.user)
+        tmp_storage.remove()
+        return HttpResponseRedirect(reverse_lazy(redirect_url))
+
 @method_decorator(login_required,name="dispatch")
 class HistorianImporterView(generic.TemplateView):
     template_name = "input/historian/historian.html"
 
 @method_decorator(login_required,name="dispatch")
-class VariableHistorianImporterView(VariableHistorianImporterFormView):
+class VariableHistorianImporterView(HistorianImporterFormView):
     model = Variable
     form_list = [
         ("step_one", structure.SelectProcessForm),
@@ -83,8 +119,17 @@ class VariableHistorianImporterView(VariableHistorianImporterFormView):
         ("step_five", connection.SelectMultipleVariableNodesForm),
         ]
 
+    def done(self,form_list,**kwargs):
+        params={}
+        for form in form_list:
+            params.update(form.cleaned_data)
+        resource = VariableResource(self.request.user)
+        dataset = OPCUAVariableHistorianDataset(params)
+        template = 'input/historian/historian_importer.html'
+        return historian_importer(self.request,resource,dataset,template)
+
 @method_decorator(login_required,name="dispatch")
-class EventHistorianImporterView(EventHistorianImporterFormView):
+class EventHistorianImporterView(HistorianImporterFormView):
     model = Event
     form_list = [
         ("step_one", structure.SelectProcessForm),
@@ -94,8 +139,16 @@ class EventHistorianImporterView(EventHistorianImporterFormView):
         ("step_five", connection.SelectMultipleEventNodesForm),
         ]
 
+    def done(self,form_list,**kwargs):
+        params={}
+        for form in form_list:
+            params.update(form.cleaned_data)
+        resource = VariableResource(self.request.user)
+        dataset = OPCUAVariableHistorianDataset(params)
+        template = 'input/historian/historian_importer.html'
+        return historian_importer(self.request,resource,dataset,template)
 @method_decorator(login_required,name="dispatch")
-class ClassHistorianImporterView(ClassHistorianImporterFormView):
+class ClassHistorianImporterView(HistorianImporterFormView):
     model = Class
     form_list = [
         ("step_one", structure.SelectProcessForm),
@@ -104,12 +157,17 @@ class ClassHistorianImporterView(ClassHistorianImporterFormView):
         ("step_four", connection.SelectMultipleEndpointsForm),
         ("step_five", connection.SelectMultipleClassNodesForm),
         ]
+    def done(self,form_list,**kwargs):
+        params={}
+        for form in form_list:
+            params.update(form.cleaned_data)
+        resource = VariableResource(self.request.user)
+        dataset = OPCUAVariableHistorianDataset(params)
+        template = 'input/historian/historian_importer.html'
+        return historian_importer(self.request,resource,dataset,template)
  
 
 ### Import Files
-@method_decorator(login_required,name='dispatch')
-class ImportView(generic.TemplateView):
-    template_name = 'input/import/import.html'
 
 def importer(request,resource,template):
     '''
@@ -149,7 +207,7 @@ def importer(request,resource,template):
             return HttpResponse (_(u"<h1>Imported file has a wrong encoding: %s</h1>" % e))
         except Exception as e:
             return HttpResponse(_(u"<h1>%s encountered while trying to load or the read file: %s</h1>" % (type(e).__name__, import_file.name)))
-            
+        print(dataset)
         result = resource.import_data(dataset, dry_run=True,
                                           raise_errors=False,
                                           file_name=import_file.name,
@@ -186,6 +244,10 @@ def processor(request,resource,template,redirect_url_name):
                                     user=request.user)
         tmp_storage.remove()
         return HttpResponseRedirect(reverse_lazy(redirect_url_name))
+
+@method_decorator(login_required,name='dispatch')
+class ImportView(generic.TemplateView):
+    template_name = 'input/import/import.html'
 
 #### VariableFileImport
 @method_decorator(login_required, name="dispatch") 
