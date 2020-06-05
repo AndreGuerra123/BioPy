@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.6"
-django = "^2.1"
+django = "^2.2"
 djangorestframework = "^3.9"
 django-crispy-forms = "^1.7"
 django-allauth = "^0.38.0"
